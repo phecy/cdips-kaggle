@@ -15,6 +15,7 @@ import random as rnd
 import logging
 from sklearn.externals import joblib
 from sklearn.metrics import roc_auc_score
+import pdb
 
 # assume data file resides in script directory
 dataFolder = "./"
@@ -76,7 +77,7 @@ def getWords(text, stemmRequired = False, correctWordRequired = False):
     stemmRequired : bool - flag whether stemming required
     correctWordRequired : bool - flag whether correction of words required     
     """
-
+    # cleanText makes text lowercase, replaces with space if not English/Russian/Numeric
     cleanText = re.sub(u'[^a-zа-я0-9]', ' ', text.lower())
     if correctWordRequired:
         words = [correctWord(w) if not stemmRequired or re.search("[0-9a-z]", w) else stemmer.stem(correctWord(w)) for w in cleanText.split() if len(w)>1 and w not in stopwords]
@@ -87,6 +88,9 @@ def getWords(text, stemmRequired = False, correctWordRequired = False):
 
 def processData(fileName, featureIndexes={}, itemsLimit=None):
     """ Processing data. """
+    ###############
+    pdb.set_trace()
+    ###############
     processMessage = ("Generate features for " if featureIndexes else "Generate features dict from ")+os.path.basename(fileName)
     logging.info(processMessage+"...")
     # This dict constructor says that when a key does not exist, add it to the dict with value 0
@@ -164,6 +168,7 @@ def main():
     f.write("id\n")
     
     for pred_score, item_id in sorted(zip(predicted_scores, testItemIds), reverse = True):
+        # only writes item_id per output spec, but may want to look at predicted_scores
         f.write("%d\n" % (item_id))
     f.close()
     logging.info("Done.")

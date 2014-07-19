@@ -16,10 +16,13 @@ import logging
 from sklearn.externals import joblib
 from sklearn.metrics import roc_auc_score
 
+# assume data file resides in script directory
 dataFolder = "./"
-
+# Create corpus (body of curated text) object; Note: не ~ no/not
 stopwords= frozenset(word.decode('utf-8') for word in nltk.corpus.stopwords.words("russian") if word!="не")    
+# Stemming reduces inflected words to their stems (e.g. remove -ed, -ing)
 stemmer = SnowballStemmer('russian')
+# Some Russian letters look to the eye like English letters, but have different utf-8 codes. See: correctWord()
 engChars = [ord(char) for char in u"cCyoOBaAKpPeE"]
 rusChars = [ord(char) for char in u"сСуоОВаАКрРеЕ"]
 eng_rusTranslateTable = dict(zip(engChars, rusChars))
@@ -30,7 +33,7 @@ logging.basicConfig(format = u'[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s] 
 def correctWord (w):
     """ Corrects word by replacing characters with written similarly depending on which language the word. 
         Fraudsters use this technique to avoid detection by anti-fraud algorithms."""
-
+# Use a majority rule to decide if a word should be translated to all-Russian or all-English
     if len(re.findall(ur"[а-я]",w))>len(re.findall(ur"[a-z]",w)):
         return w.translate(eng_rusTranslateTable)
     else:

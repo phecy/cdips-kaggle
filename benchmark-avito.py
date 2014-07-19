@@ -18,7 +18,9 @@ from sklearn.metrics import roc_auc_score
 
 # assume data file resides in script directory
 dataFolder = "./"
-# Create corpus (body of curated text) object; Note: не ~ no/not
+# Need to run nltk.download() to get the stopwords corpus (8KB or so).
+# Stop words are filtered out prior to NLP (e.g. prepositions)
+#   Note: не ~ no/not and this is coded NOT to be a stop word.
 stopwords= frozenset(word.decode('utf-8') for word in nltk.corpus.stopwords.words("russian") if word!="не")    
 # Stemming reduces inflected words to their stems (e.g. remove -ed, -ing)
 stemmer = SnowballStemmer('russian')
@@ -44,12 +46,14 @@ def getItems(fileName, itemsLimit=None):
     
     with open(os.path.join(dataFolder, fileName)) as items_fd:
         logging.info("Sampling...")
+        # This allows for partial sampling from the input file
         if itemsLimit:
             countReader = csv.DictReader(items_fd, delimiter='\t', quotechar='"')
             numItems = 0
             for row in countReader:
                 numItems += 1
             items_fd.seek(0)        
+            # Setting random seed makes each run of the algorithm deterministic
             rnd.seed(0)
             sampleIndexes = set(rnd.sample(range(numItems),itemsLimit))
             
@@ -58,6 +62,7 @@ def getItems(fileName, itemsLimit=None):
         itemNum = 0
         for i, item in enumerate(itemReader):
             item = {featureName:featureValue.decode('utf-8') for featureName,featureValue in item.iteritems()}
+            # If a limit was set, then only yield the sampleIndexes items
             if not itemsLimit or i in sampleIndexes:
                 itemNum += 1
                 yield itemNum, item
@@ -84,7 +89,7 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
     """ Processing data. """
     processMessage = ("Generate features for " if featureIndexes else "Generate features dict from ")+os.path.basename(fileName)
     logging.info(processMessage+"...")
-
+    # This dict constructor says that when a key does not exist, add it to the dict with value 0
     wordCounts = defaultdict(lambda: 0)
     targets = []
     item_ids = []
@@ -93,6 +98,7 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
     cur_row = 0
     for processedCnt, item in getItems(fileName, itemsLimit):
         #col = []
+        # Defaults are no stemming and no correction
         for word in getWords(item["title"]+" "+item["description"], stemmRequired = False, correctWordRequired = False):
             if not featureIndexes:
                 wordCounts[word] += 1
@@ -127,13 +133,20 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
 
 def main():
     """ Generates features and fits classifier. """
-    
-#     featureIndexes = processData(os.path.join(dataFolder,"avito_train.tsv"), itemsLimit=300000)
-#     trainFeatures,trainTargets, trainItemIds=processData(os.path.join(dataFolder,"avito_train.tsv"), featureIndexes, itemsLimit=300000)
-#     testFeatures, testItemIds=processData(os.path.join(dataFolder,"avito_test.tsv"), featureIndexes)
-#    joblib.dump((trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), os.path.join(dataFolder,"train_data.pkl"))
+   ## This block is used to dump the feature pickle, called only once on a given train/test set. 
+   ## joblib replaces standard pickle load to work well with large data objects
+   ####
+    featureIndexes = processData(os.path.join(dataFolder,"avito_train_top100.tsv"))
+    # Targets refers to ads with is_blocked
+    trainFeatures,trainTargets,trainItemIds = processData(os.path.join(dataFolder,"avito_train_top100.tsv"), featureIndexes)
+    testFeatures,testItemIds = processData(os.path.join(dataFolder,"avito_test_top100.tsv"), featureIndexes)
+    joblib.dump((trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), os.path.join(dataFolder,"train_data.pkl"))
+   ####
     trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(os.path.join(dataFolder,"train_data.pkl"))
     logging.info("Feature preparation done, fitting model...")
+    # Stochastic Gradient Descent training used (online learning)
+    # loss (cost) = log ~ Logistic Regression
+    # L2 norm used for cost, alpha defines learning rate
     clf = SGDClassifier(    loss="log", 
                             penalty="l2", 
                             alpha=1e-4, 
@@ -143,7 +156,6 @@ def main():
     logging.info("Predicting...")
     
     predicted_scores = clf.predict_proba(testFeatures).T[1]
-
     
     logging.info("Write results...")
     output_file = "avito_starter_solution.csv"

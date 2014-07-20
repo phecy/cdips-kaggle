@@ -16,6 +16,8 @@ import logging
 from sklearn.externals import joblib
 from sklearn.metrics import roc_auc_score
 import pdb
+import datetime
+import time
 
 # assume data file resides in script directory
 dataFolder = "./"
@@ -49,6 +51,7 @@ def getItems(fileName, itemsLimit=None):
         logging.info("Sampling...")
         # This allows for partial sampling from the input file
         if itemsLimit:
+           # Iteration is a slow way to count the number of Items
             countReader = csv.DictReader(items_fd, delimiter='\t', quotechar='"')
             numItems = 0
             for row in countReader:
@@ -181,4 +184,7 @@ def main():
     logging.info("Done.")
                                
 if __name__=="__main__":            
-    main()            
+    tstart = time.time()
+    main()
+    tend = time.time()
+    print "benchmark_avito.py time H:M:S = "+str(datetime.timedelta(seconds=tend-tstart))

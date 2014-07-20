@@ -82,6 +82,7 @@ def getWords(text, stemmRequired = False, correctWordRequired = False):
     if correctWordRequired:
         words = [correctWord(w) if not stemmRequired or re.search("[0-9a-z]", w) else stemmer.stem(correctWord(w)) for w in cleanText.split() if len(w)>1 and w not in stopwords]
     else:
+        # Always follows else clause and breaks if only first clause run
         words = [w if not stemmRequired or re.search("[0-9a-z]", w) else stemmer.stem(w) for w in cleanText.split() if len(w)>1 and w not in stopwords]
     
     return words

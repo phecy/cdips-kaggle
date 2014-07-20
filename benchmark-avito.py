@@ -44,7 +44,7 @@ def correctWord (w):
 
 def getItems(fileName, itemsLimit=None):
     """ Reads data file. """
-    
+   # This is the generator to be used by processData 
     with open(os.path.join(dataFolder, fileName)) as items_fd:
         logging.info("Sampling...")
         # This allows for partial sampling from the input file
@@ -77,6 +77,7 @@ def getWords(text, stemmRequired = False, correctWordRequired = False):
     stemmRequired : bool - flag whether stemming required
     correctWordRequired : bool - flag whether correction of words required     
     """
+    # Note: this is not a generator like getItems()
     # cleanText makes text lowercase, replaces with space if not English/Russian/Numeric
     cleanText = re.sub(u'[^a-zа-я0-9]', ' ', text.lower())
     if correctWordRequired:
@@ -89,9 +90,6 @@ def getWords(text, stemmRequired = False, correctWordRequired = False):
 
 def processData(fileName, featureIndexes={}, itemsLimit=None):
     """ Processing data. """
-    ###############
-    pdb.set_trace()
-    ###############
     processMessage = ("Generate features for " if featureIndexes else "Generate features dict from ")+os.path.basename(fileName)
     logging.info(processMessage+"...")
     # This dict constructor says that when a key does not exist, add it to the dict with value 0
@@ -141,10 +139,18 @@ def main():
    ## This block is used to dump the feature pickle, called only once on a given train/test set. 
    ## joblib replaces standard pickle load to work well with large data objects
    ####
-    featureIndexes = processData(os.path.join(dataFolder,"avito_train_top100.tsv"))
+   # featureIndexes are words/numbers in description/title linked to sequential numerical indices
+   # Note: Sampling 100 rows takes _much_ longer than using a 100-row input file
+    featureIndexes = processData(os.path.join(dataFolder,"avito_train.tsv"),{},100)
     # Targets refers to ads with is_blocked
-    trainFeatures,trainTargets,trainItemIds = processData(os.path.join(dataFolder,"avito_train_top100.tsv"), featureIndexes)
-    testFeatures,testItemIds = processData(os.path.join(dataFolder,"avito_test_top100.tsv"), featureIndexes)
+    ###############
+    #pdb.set_trace()
+    ###############
+   # trainFeatures is sparse matrix of [m-words x n-examples], Targets is [nx1] binary, ItemIds are ad index (for submission)
+   # only ~7.6 new words (not stems) per ad. Matrix is 96.4% zeros.
+    trainFeatures,trainTargets,trainItemIds = processData(os.path.join(dataFolder,"avito_train.tsv"), featureIndexes,100)
+   # Recall, we are predicting testTargets
+    testFeatures,testItemIds = processData(os.path.join(dataFolder,"avito_test.tsv"), featureIndexes, 100)
     joblib.dump((trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), os.path.join(dataFolder,"train_data.pkl"))
    ####
     trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(os.path.join(dataFolder,"train_data.pkl"))
@@ -159,7 +165,7 @@ def main():
     clf.fit(trainFeatures,trainTargets)
 
     logging.info("Predicting...")
-    
+   # Use probabilities instead of binary class prediction in order to generate a ranking    
     predicted_scores = clf.predict_proba(testFeatures).T[1]
     
     logging.info("Write results...")
@@ -169,7 +175,7 @@ def main():
     f.write("id\n")
     
     for pred_score, item_id in sorted(zip(predicted_scores, testItemIds), reverse = True):
-        # only writes item_id per output spec, but may want to look at predicted_scores
+       # only writes item_id per output spec, but may want to look at predicted_scores
         f.write("%d\n" % (item_id))
     f.close()
     logging.info("Done.")

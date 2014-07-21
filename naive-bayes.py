@@ -4,7 +4,7 @@ Modifying benchmark to:
     use Russian stemmer on description text (unused by default before)
     use bernoulli naive bayes on word occurences (instead of logistic on counts)
     add feature: boolean mixedLang for correctWord() eng-rus translation
-    add features: used_exclamation, used_question (punctuation guidelines same for Russian)
+    add features: has_?, has_! (punctuation guidelines same for Russian)
     add features: has_phone, has_url, has_email (>0 on count data)
 """
 import csv
@@ -37,6 +37,8 @@ engChars = [ord(char) for char in u"cCyoOBaAKpPeE"]
 rusChars = [ord(char) for char in u"сСуоОВаАКрРеЕ"]
 eng_rusTranslateTable = dict(zip(engChars, rusChars))
 rus_engTranslateTable = dict(zip(rusChars, engChars))
+# Original code used count threshold of 3
+COUNT_MIN = 1
 
 logging.basicConfig(format = u'[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s', level = logging.NOTSET)
         
@@ -104,11 +106,13 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
     wordCounts = defaultdict(lambda: 0)
     targets = []
     item_ids = []
+    # Rows are examples
     row = []
+    # Cols are features (featureIndexes translates words to col numbers)
     col = []
     cur_row = 0
     for processedCnt, item in getItems(fileName, itemsLimit):
-        #col = []
+        # First call: accumulate wordCounts. Next calls: iteratively create sparse row indices
         # Defaults are no stemming and no correction
         for word in getWords(item["title"]+" "+item["description"], stemmRequired = False, correctWordRequired = False):
             if not featureIndexes:
@@ -117,6 +121,10 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
                 if word in featureIndexes:
                     col.append(featureIndexes[word])
                     row.append(cur_row)
+                # Add new feature counting / analysis with these blocks:
+                #if word in featureIndexes:
+                  #col.append(featureIndexes[word])
+                  #row.append(cur_row)
         
         if featureIndexes:
             cur_row += 1
@@ -126,16 +134,21 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
                     
         if processedCnt%1000 == 0:                 
             logging.debug(processMessage+": "+str(processedCnt)+" items done")
-                
+
+    # First call enters here, returns just the featureIndexes            
     if not featureIndexes:
         index = 0
         for word, count in wordCounts.iteritems():
-            if count>=3:
+            if count>=COUNT_MIN:
                 featureIndexes[word]=index
                 index += 1
-                
+        # [Adding feature indices beyond words comes here]
+        #for newFeature in ["has_?","has_!","has_phone","has_url","has_email"]:
+            #featureIndexes[newFeature]=index
+            #index += 1
         return featureIndexes
     else:
+        # Create spare row matrix of features -- originally 0/1 not counts
         features = sp.csr_matrix((np.ones(len(row)),(row,col)), shape=(cur_row, len(featureIndexes)), dtype=np.float64)
         if targets:
             return features, targets, item_ids

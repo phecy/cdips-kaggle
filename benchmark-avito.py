@@ -144,16 +144,16 @@ def main():
    ####
    # featureIndexes are words/numbers in description/title linked to sequential numerical indices
    # Note: Sampling 100 rows takes _much_ longer than using a 100-row input file
-    featureIndexes = processData(os.path.join(dataFolder,"avito_train.tsv"),{},100)
+    featureIndexes = processData(os.path.join(dataFolder,"avito_train.tsv"))
     # Targets refers to ads with is_blocked
     ###############
     #pdb.set_trace()
     ###############
    # trainFeatures is sparse matrix of [m-words x n-examples], Targets is [nx1] binary, ItemIds are ad index (for submission)
    # only ~7.6 new words (not stems) per ad. Matrix is 96.4% zeros.
-    trainFeatures,trainTargets,trainItemIds = processData(os.path.join(dataFolder,"avito_train.tsv"), featureIndexes,100)
+    trainFeatures,trainTargets,trainItemIds = processData(os.path.join(dataFolder,"avito_train.tsv"), featureIndexes)
    # Recall, we are predicting testTargets
-    testFeatures,testItemIds = processData(os.path.join(dataFolder,"avito_test.tsv"), featureIndexes, 100)
+    testFeatures,testItemIds = processData(os.path.join(dataFolder,"avito_test.tsv"), featureIndexes)
     joblib.dump((trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), os.path.join(dataFolder,"train_data.pkl"))
    ####
     trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(os.path.join(dataFolder,"train_data.pkl"))

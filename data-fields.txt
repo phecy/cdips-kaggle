@@ -1,0 +1,14 @@
+Data fields
+itemid      - unique identifier of each ad
+category    – 1st level category of an ad
+subcategory – 2nd level category of an ad
+title       – name of the Ad
+description – Full text with ad description
+attrs       – additional parameters of the ad in JSON format. Each parameter has its name and its value. E.g if you are selling bmw z1 car, you would have {“car brand”:”bmw”, “car model”:”z1”}
+price       – final price of ad in Russian rubles
+is_proved   – Additional data column that is available in the training only. Not to be used as a direct modeling attribute. This flag is provided only for blocked ads. It indicates that ad was blocked by an experienced moderator. Because humans do make errors it is likely (though not proven) that ads blocked by experienced moderator who should contain larger % of actually illicit content.
+is_blocked  – Boolean target variable. This is the column to predict.
+phones_cnt  – Number of contact phones that we found in ad description. Some sellers provide their contact phone numbers in ad description. If it was the case we would replace this phone number with @@PHONE@@ in description.
+emails_cnt  – Number of emails that we found in ad description. Some sellers provide their emails in ad description. If it was the case we would replace this email with @@EMAIL@@ in description.
+urls_cnt    – Number of urls that we found in ad description. Some sellers provide urls in ad description. If it was the case we would replace this email with @@URL@@ in description.
+close_hours – Available in train only! Number of hours as a real number how long ad was live on avito. The more hours it was live and was not blocked it is more likely that it does not contain illicit content and it was not missed by moderators by error.

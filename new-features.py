@@ -22,6 +22,7 @@ from sklearn.metrics import roc_auc_score
 import pdb
 import datetime
 import time
+import sys
 
 # assume data file resides in script directory
 dataFolder = "./"
@@ -188,8 +189,10 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
         else:
             return features, item_ids
 
-def main():
-    """ Generates features and fits classifier. """
+def main(run_name=time.strftime('%h%d-%Hh%Mm')):
+    """ Generates features and fits classifier. 
+    Input command line argument is optional run name, defaults to date/time.
+    """
    ## This block is used to dump the feature pickle, called only once on a given train/test set. 
    ## joblib replaces standard pickle load to work well with large data objects
    ####
@@ -202,9 +205,9 @@ def main():
     trainFeatures,trainTargets,trainItemIds = processData(os.path.join(dataFolder,"avito_train.tsv"), featureIndexes)
    # Recall, we are predicting testTargets
     testFeatures,testItemIds = processData(os.path.join(dataFolder,"avito_test.tsv"), featureIndexes)
-    joblib.dump((trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), os.path.join(dataFolder,"train_data.pkl"))
+    joblib.dump((trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), os.path.join(dataFolder,run_name,"train_data.pkl"))
    ####
-    trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(os.path.join(dataFolder,"train_data.pkl"))
+    trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(os.path.join(dataFolder,run_name,"train_data.pkl"))
     logging.info("Feature preparation done, fitting model...")
     # Stochastic Gradient Descent training used (online learning)
     # loss (cost) = log ~ Logistic Regression
@@ -233,6 +236,9 @@ def main():
                                
 if __name__=="__main__":            
     tstart = time.time()
-    main()
+    if len(sys.argv):
+        main(sys.argv[1])
+    else:
+        main()
     tend = time.time()
     print "benchmark_avito.py time H:M:S = "+str(datetime.timedelta(seconds=tend-tstart))

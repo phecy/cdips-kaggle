@@ -181,7 +181,7 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
         #for newFeature in NEW_FEATURE_LIST:
         #    featureIndexes[newFeature]=index
         #    index += 1
-        #return featureIndexes
+        return featureIndexes
     else:
         # Create spare row matrix of features -- originally 0/1 not counts
         features = sp.csr_matrix((np.ones(len(row)),(row,col)), shape=(cur_row, len(featureIndexes)), dtype=np.float64)

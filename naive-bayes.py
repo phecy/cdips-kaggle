@@ -39,6 +39,7 @@ eng_rusTranslateTable = dict(zip(engChars, rusChars))
 rus_engTranslateTable = dict(zip(rusChars, engChars))
 # Original code used count threshold of 3
 COUNT_MIN = 1
+NEW_FEATURE_LIST = ["has_?","has_!","has_phone","has_url","has_email","has_mixed_lang"]
 
 logging.basicConfig(format = u'[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s', level = logging.NOTSET)
         
@@ -95,7 +96,6 @@ def getWords(text, stemmRequired = False, correctWordRequired = False):
     else:
         # Always follows else clause and breaks if only first clause run
         words = [w if not stemmRequired or re.search("[0-9a-z]", w) else stemmer.stem(w) for w in cleanText.split() if len(w)>1 and w not in stopwords]
-    
     return words
 
 def processData(fileName, featureIndexes={}, itemsLimit=None):
@@ -114,6 +114,7 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
     for processedCnt, item in getItems(fileName, itemsLimit):
         # First call: accumulate wordCounts. Next calls: iteratively create sparse row indices
         # Defaults are no stemming and no correction
+        has_mixed_lang = False
         for word in getWords(item["title"]+" "+item["description"], stemmRequired = False, correctWordRequired = False):
             if not featureIndexes:
                 wordCounts[word] += 1
@@ -121,11 +122,34 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
                 if word in featureIndexes:
                     col.append(featureIndexes[word])
                     row.append(cur_row)
-                # Add new feature counting / analysis with these blocks:
-                #if word in featureIndexes:
-                  #col.append(featureIndexes[word])
-                  #row.append(cur_row)
-        
+            # Check for mixed Russian/English encoded words
+            if not has_mixed_lang:
+                if len(re.findall(ur"[а-я]",w))>0 and len(re.findall(ur"[a-z]",w))>0:
+                    has_mixed_lang = True
+
+        # Add new feature counting / analysis with these blocks:
+        if featureIndexes:
+            text = item["title"]+" "+item["description"]
+            if text.count("?")>0:
+                  col.append(featureIndexes["has_?"])
+                  row.append(cur_row)
+            if text.count("!")>0:
+                  col.append(featureIndexes["has_!"])
+                  row.append(cur_row)
+            if int(item["phones_cnt"])>0:
+                  col.append(featureIndexes["has_phone"])
+                  row.append(cur_row)
+            if int(item["url_cnt"])>0:
+                  col.append(featureIndexes["has_url"])
+                  row.append(cur_row)
+            if int(item["email_cnt"])>0:
+                  col.append(featureIndexes["has_email"])
+                  row.append(cur_row)
+            if has_mixed_lang:
+                  col.append(featureIndexes["has_mixed_lang"])
+                  row.append(cur_row)
+
+       # Create target (if valid) and item_id  lists
         if featureIndexes:
             cur_row += 1
             if "is_blocked" in item:
@@ -142,10 +166,10 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
             if count>=COUNT_MIN:
                 featureIndexes[word]=index
                 index += 1
-        # [Adding feature indices beyond words comes here]
-        #for newFeature in ["has_?","has_!","has_phone","has_url","has_email"]:
-            #featureIndexes[newFeature]=index
-            #index += 1
+        # Adding new feature indices beyond words
+        for newFeature in NEW_FEATURE_LIST:
+            featureIndexes[newFeature]=index
+            index += 1
         return featureIndexes
     else:
         # Create spare row matrix of features -- originally 0/1 not counts

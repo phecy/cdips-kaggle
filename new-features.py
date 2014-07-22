@@ -118,9 +118,6 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
     col = []
     cur_row = 0
     for processedCnt, item in getItems(fileName, itemsLimit):
-        ###############
-        pdb.set_trace()
-        ###############
         # First call: accumulate wordCounts. Next calls: iteratively create sparse row indices
         # Defaults are no stemming and no correction
         has_mixed_lang = False
@@ -198,9 +195,6 @@ def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file="avito_train.tsv", te
    ####
    # featureIndexes are words/numbers in description/title linked to sequential numerical indices
    # Note: Sampling 100 rows takes _much_ longer than using a 100-row input file
-    ###############
-    pdb.set_trace()
-    ###############
     featureIndexes = processData(os.path.join(dataFolder,train_file))
     # Targets refers to ads with is_blocked
    # trainFeatures is sparse matrix of [m-words x n-examples], Targets is [nx1] binary, ItemIds are ad index (for submission)
@@ -238,9 +232,6 @@ def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file="avito_train.tsv", te
     logging.info("Done.")
                                
 if __name__=="__main__":            
-    ###############
-    pdb.set_trace()
-    ###############
     tstart = time.time()
     if len(sys.argv)>1:
         main(*sys.argv[1:])

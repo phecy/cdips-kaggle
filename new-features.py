@@ -189,7 +189,7 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
         else:
             return features, item_ids
 
-def main(run_name=time.strftime('%h%d-%Hh%Mm')):
+def main(run_name=time.strftime('%h%d-%Hh%Mm'), run_limit=None):
     """ Generates features and fits classifier. 
     Input command line argument is optional run name, defaults to date/time.
     """
@@ -198,13 +198,13 @@ def main(run_name=time.strftime('%h%d-%Hh%Mm')):
    ####
    # featureIndexes are words/numbers in description/title linked to sequential numerical indices
    # Note: Sampling 100 rows takes _much_ longer than using a 100-row input file
-    featureIndexes = processData(os.path.join(dataFolder,"avito_train.tsv"),)
+    featureIndexes = processData(os.path.join(dataFolder,"avito_train.tsv"), itemsLimit=run_limit)
     # Targets refers to ads with is_blocked
    # trainFeatures is sparse matrix of [m-words x n-examples], Targets is [nx1] binary, ItemIds are ad index (for submission)
    # only ~7.6 new words (not stems) per ad. Matrix is 96.4% zeros.
-    trainFeatures,trainTargets,trainItemIds = processData(os.path.join(dataFolder,"avito_train.tsv"), featureIndexes)
+    trainFeatures,trainTargets,trainItemIds = processData(os.path.join(dataFolder,"avito_train.tsv"), featureIndexes, itemsLimit=run_limit)
    # Recall, we are predicting testTargets
-    testFeatures,testItemIds = processData(os.path.join(dataFolder,"avito_test.tsv"), featureIndexes)
+    testFeatures,testItemIds = processData(os.path.join(dataFolder,"avito_test.tsv"), featureIndexes, itemsLimit=run_limit)
     joblib.dump((trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), os.path.join(dataFolder,run_name,"train_data.pkl"))
    ####
     trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(os.path.join(dataFolder,run_name,"train_data.pkl"))
@@ -223,9 +223,9 @@ def main(run_name=time.strftime('%h%d-%Hh%Mm')):
     predicted_scores = clf.predict_proba(testFeatures).T[1]
     
     logging.info("Write results...")
-    output_file = "avito_starter_solution.csv"
+    output_file = "output-item-ranking.csv"
     logging.info("Writing submission to %s" % output_file)
-    f = open(os.path.join(dataFolder,output_file), "w")
+    f = open(os.path.join(dataFolder,run_name,output_file), "w")
     f.write("id\n")
     
     for pred_score, item_id in sorted(zip(predicted_scores, testItemIds), reverse = True):
@@ -236,8 +236,10 @@ def main(run_name=time.strftime('%h%d-%Hh%Mm')):
                                
 if __name__=="__main__":            
     tstart = time.time()
-    if len(sys.argv):
+    if len(sys.argv)==2:
         main(sys.argv[1])
+    elif len(sys.argv)==3:
+        main(sys.argv[1],int(sys.argv[2]))
     else:
         main()
     tend = time.time()

@@ -2,7 +2,6 @@
 """
 Modifying benchmark to:
     use Russian stemmer on description text (unused by default before)
-    use bernoulli naive bayes on word occurences (instead of logistic on counts)
     add feature: boolean mixedLang for correctWord() eng-rus translation
     add features: has_?, has_! (punctuation guidelines same for Russian)
     add features: has_phone, has_url, has_email (>0 on count data)

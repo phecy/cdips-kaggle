@@ -238,4 +238,4 @@ if __name__=="__main__":
     else:
         main()
     tend = time.time()
-    print "benchmark_avito.py time H:M:S = "+str(datetime.timedelta(seconds=tend-tstart))
+    print sys.argv[0]+"time H:M:S = "+str(datetime.timedelta(seconds=tend-tstart))

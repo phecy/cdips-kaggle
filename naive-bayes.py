@@ -40,6 +40,9 @@ rus_engTranslateTable = dict(zip(rusChars, engChars))
 # Original code used count threshold of 3
 COUNT_MIN = 1
 NEW_FEATURE_LIST = ["has_?","has_!","has_phone","has_url","has_email","has_mixed_lang"]
+# From <http://www.russianlessons.net/lessons/lesson1_alphabet.php>. 33 characters, each 2 bytes
+RUSSIAN_LETTERS = ur"АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя"
+RUSSIAN_LOWER = RUSSIAN_LETTERS[1::2]
 
 logging.basicConfig(format = u'[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s', level = logging.NOTSET)
         
@@ -47,7 +50,7 @@ def correctWord (w):
     """ Corrects word by replacing characters with written similarly depending on which language the word. 
         Fraudsters use this technique to avoid detection by anti-fraud algorithms."""
 # Use a majority rule to decide if a word should be translated to all-Russian or all-English
-    if len(re.findall(ur"[а-я]",w))>len(re.findall(ur"[a-z]",w)):
+    if len(re.findall(ur"["+RUSSIAN_LOWER+ur"]",w))>len(re.findall(ur"[a-z]",w)):
         return w.translate(eng_rusTranslateTable)
     else:
         return w.translate(rus_engTranslateTable)
@@ -73,6 +76,7 @@ def getItems(fileName, itemsLimit=None):
         itemReader=csv.DictReader(items_fd, delimiter='\t', quotechar = '"')
         itemNum = 0
         for i, item in enumerate(itemReader):
+            # After .decode(utf8), ready to use as input to stemmer
             item = {featureName:featureValue.decode('utf-8') for featureName,featureValue in item.iteritems()}
             # If a limit was set, then only yield the sampleIndexes items
             if not itemsLimit or i in sampleIndexes:
@@ -112,10 +116,14 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
     col = []
     cur_row = 0
     for processedCnt, item in getItems(fileName, itemsLimit):
+        ###############
+        #pdb.set_trace()
+        ###############
         # First call: accumulate wordCounts. Next calls: iteratively create sparse row indices
         # Defaults are no stemming and no correction
         has_mixed_lang = False
-        for word in getWords(item["title"]+" "+item["description"], stemmRequired = False, correctWordRequired = False):
+        #for word in getWords(item["title"]+" "+item["description"], stemmRequired = False, correctWordRequired = False):
+        for word in getWords(item["title"]+" "+item["description"], stemmRequired = True, correctWordRequired = False):
             if not featureIndexes:
                 wordCounts[word] += 1
             else:
@@ -124,7 +132,10 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
                     row.append(cur_row)
             # Check for mixed Russian/English encoded words
             if not has_mixed_lang:
-                if len(re.findall(ur"[а-я]",w))>0 and len(re.findall(ur"[a-z]",w))>0:
+                if len(re.findall(ur"["+RUSSIAN_LOWER+ur"]",w)) and len(re.findall(ur"[a-z]",word))>0:
+                    ###############
+                    pdb.set_trace()
+                    ###############
                     has_mixed_lang = True
 
         # Add new feature counting / analysis with these blocks:
@@ -149,7 +160,7 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
                   col.append(featureIndexes["has_mixed_lang"])
                   row.append(cur_row)
 
-       # Create target (if valid) and item_id  lists
+       # Create target (if valid) and item_id lists
         if featureIndexes:
             cur_row += 1
             if "is_blocked" in item:
@@ -186,11 +197,8 @@ def main():
    ####
    # featureIndexes are words/numbers in description/title linked to sequential numerical indices
    # Note: Sampling 100 rows takes _much_ longer than using a 100-row input file
-    featureIndexes = processData(os.path.join(dataFolder,"avito_train.tsv"))
+    featureIndexes = processData(os.path.join(dataFolder,"avito_train.tsv"),)
     # Targets refers to ads with is_blocked
-    ###############
-    #pdb.set_trace()
-    ###############
    # trainFeatures is sparse matrix of [m-words x n-examples], Targets is [nx1] binary, ItemIds are ad index (for submission)
    # only ~7.6 new words (not stems) per ad. Matrix is 96.4% zeros.
     trainFeatures,trainTargets,trainItemIds = processData(os.path.join(dataFolder,"avito_train.tsv"), featureIndexes)

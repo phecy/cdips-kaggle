@@ -1,5 +1,6 @@
 # coding: utf-8
 """
+(THIS BRANCH NEGATES THE CHANGES MADE BELOW)
 Modifying benchmark to:
     use Russian stemmer on description text (unused by default before)
     add feature: boolean mixedLang for correctWord() eng-rus translation
@@ -119,13 +120,13 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
     cur_row = 0
     for processedCnt, item in getItems(fileName, itemsLimit):
         ###############
-        pdb.set_trace()
+        #pdb.set_trace()
         ###############
         # First call: accumulate wordCounts. Next calls: iteratively create sparse row indices
         # Defaults are no stemming and no correction
         has_mixed_lang = False
         #for word in getWords(item["title"]+" "+item["description"], stemmRequired = False, correctWordRequired = False):
-        for word in getWords(item["title"]+" "+item["description"], stemmRequired = True, correctWordRequired = False):
+        for word in getWords(item["title"]+" "+item["description"], stemmRequired = False, correctWordRequired = False):
             if not featureIndexes:
                 wordCounts[word] += 1
             else:
@@ -138,26 +139,26 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
                     has_mixed_lang = True
 
         # Add new feature counting / analysis with these blocks:
-        if featureIndexes:
-            text = item["title"]+" "+item["description"]
-            if text.count("?")>0:
-                  col.append(featureIndexes["has_?"])
-                  row.append(cur_row)
-            if text.count("!")>0:
-                  col.append(featureIndexes["has_!"])
-                  row.append(cur_row)
-            if int(item["phones_cnt"])>0:
-                  col.append(featureIndexes["has_phone"])
-                  row.append(cur_row)
-            if int(item["urls_cnt"])>0:
-                  col.append(featureIndexes["has_url"])
-                  row.append(cur_row)
-            if int(item["emails_cnt"])>0:
-                  col.append(featureIndexes["has_email"])
-                  row.append(cur_row)
-            if has_mixed_lang:
-                  col.append(featureIndexes["has_mixed_lang"])
-                  row.append(cur_row)
+        #if featureIndexes:
+        #    text = item["title"]+" "+item["description"]
+        #    if text.count("?")>0:
+        #          col.append(featureIndexes["has_?"])
+        #          row.append(cur_row)
+        #    if text.count("!")>0:
+        #          col.append(featureIndexes["has_!"])
+        #          row.append(cur_row)
+        #    if int(item["phones_cnt"])>0:
+        #          col.append(featureIndexes["has_phone"])
+        #          row.append(cur_row)
+        #    if int(item["urls_cnt"])>0:
+        #          col.append(featureIndexes["has_url"])
+        #          row.append(cur_row)
+        #    if int(item["emails_cnt"])>0:
+        #          col.append(featureIndexes["has_email"])
+        #          row.append(cur_row)
+        #    if has_mixed_lang:
+        #          col.append(featureIndexes["has_mixed_lang"])
+        #          row.append(cur_row)
 
        # Create target (if valid) and item_id lists
         if featureIndexes:
@@ -177,10 +178,10 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
                 featureIndexes[word]=index
                 index += 1
         # Adding new feature indices beyond words
-        for newFeature in NEW_FEATURE_LIST:
-            featureIndexes[newFeature]=index
-            index += 1
-        return featureIndexes
+        #for newFeature in NEW_FEATURE_LIST:
+        #    featureIndexes[newFeature]=index
+        #    index += 1
+        #return featureIndexes
     else:
         # Create spare row matrix of features -- originally 0/1 not counts
         features = sp.csr_matrix((np.ones(len(row)),(row,col)), shape=(cur_row, len(featureIndexes)), dtype=np.float64)
@@ -199,7 +200,7 @@ def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file="avito_train.tsv", te
    # featureIndexes are words/numbers in description/title linked to sequential numerical indices
    # Note: Sampling 100 rows takes _much_ longer than using a 100-row input file
     ###############
-    pdb.set_trace()
+    #pdb.set_trace()
     ###############
     featureIndexes = processData(os.path.join(dataFolder,train_file))
     # Targets refers to ads with is_blocked
@@ -208,6 +209,8 @@ def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file="avito_train.tsv", te
     trainFeatures,trainTargets,trainItemIds = processData(os.path.join(dataFolder,train_file), featureIndexes)
    # Recall, we are predicting testTargets
     testFeatures,testItemIds = processData(os.path.join(dataFolder,test_file), featureIndexes)
+    if not os.path.exists(os.path.join(dataFolder,run_name)):
+        os.makedirs(os.path.join(dataFolder,run_name))
     joblib.dump((trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), os.path.join(dataFolder,run_name,"train_data.pkl"))
    ####
     trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(os.path.join(dataFolder,run_name,"train_data.pkl"))
@@ -239,7 +242,7 @@ def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file="avito_train.tsv", te
                                
 if __name__=="__main__":            
     ###############
-    pdb.set_trace()
+    #pdb.set_trace()
     ###############
     tstart = time.time()
     if len(sys.argv)>1:

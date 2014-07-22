@@ -202,6 +202,8 @@ def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file="avito_train.tsv", te
     trainFeatures,trainTargets,trainItemIds = processData(os.path.join(dataFolder,train_file), featureIndexes)
    # Recall, we are predicting testTargets
     testFeatures,testItemIds = processData(os.path.join(dataFolder,test_file), featureIndexes)
+    if not os.path.exists(os.path.join(dataFolder,run_name)):
+        os.makedirs(os.path.join(dataFolder,run_name))
     joblib.dump((trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), os.path.join(dataFolder,run_name,"train_data.pkl"))
    ####
     trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(os.path.join(dataFolder,run_name,"train_data.pkl"))

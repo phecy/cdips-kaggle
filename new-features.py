@@ -119,7 +119,7 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
     cur_row = 0
     for processedCnt, item in getItems(fileName, itemsLimit):
         ###############
-        #pdb.set_trace()
+        pdb.set_trace()
         ###############
         # First call: accumulate wordCounts. Next calls: iteratively create sparse row indices
         # Defaults are no stemming and no correction
@@ -189,7 +189,7 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
         else:
             return features, item_ids
 
-def main(run_name=time.strftime('%h%d-%Hh%Mm'), run_limit=None):
+def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file="avito_train.tsv", test_file="avito_test.tsv"):
     """ Generates features and fits classifier. 
     Input command line argument is optional run name, defaults to date/time.
     """
@@ -198,13 +198,16 @@ def main(run_name=time.strftime('%h%d-%Hh%Mm'), run_limit=None):
    ####
    # featureIndexes are words/numbers in description/title linked to sequential numerical indices
    # Note: Sampling 100 rows takes _much_ longer than using a 100-row input file
-    featureIndexes = processData(os.path.join(dataFolder,"avito_train.tsv"), itemsLimit=run_limit)
+    ###############
+    pdb.set_trace()
+    ###############
+    featureIndexes = processData(os.path.join(dataFolder,train_file))
     # Targets refers to ads with is_blocked
    # trainFeatures is sparse matrix of [m-words x n-examples], Targets is [nx1] binary, ItemIds are ad index (for submission)
    # only ~7.6 new words (not stems) per ad. Matrix is 96.4% zeros.
-    trainFeatures,trainTargets,trainItemIds = processData(os.path.join(dataFolder,"avito_train.tsv"), featureIndexes, itemsLimit=run_limit)
+    trainFeatures,trainTargets,trainItemIds = processData(os.path.join(dataFolder,train_file), featureIndexes)
    # Recall, we are predicting testTargets
-    testFeatures,testItemIds = processData(os.path.join(dataFolder,"avito_test.tsv"), featureIndexes, itemsLimit=run_limit)
+    testFeatures,testItemIds = processData(os.path.join(dataFolder,test_file), featureIndexes)
     joblib.dump((trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), os.path.join(dataFolder,run_name,"train_data.pkl"))
    ####
     trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(os.path.join(dataFolder,run_name,"train_data.pkl"))
@@ -235,11 +238,12 @@ def main(run_name=time.strftime('%h%d-%Hh%Mm'), run_limit=None):
     logging.info("Done.")
                                
 if __name__=="__main__":            
+    ###############
+    pdb.set_trace()
+    ###############
     tstart = time.time()
-    if len(sys.argv)==2:
-        main(sys.argv[1])
-    elif len(sys.argv)==3:
-        main(sys.argv[1],int(sys.argv[2]))
+    if len(sys.argv)>1:
+        main(*sys.argv[1:])
     else:
         main()
     tend = time.time()

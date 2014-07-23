@@ -3,10 +3,11 @@
 Use pandas pivots to understand categories and json fields
 '''
 import numpy as np
-from scipy import sparse
+import os
 import pandas as pd
-import sys
+from scipy import sparse
 from sklearn.externals import joblib
+import sys
 
 def indicator(df,label,noncollinear=False):
     # Make csr dummy variable from categorical label

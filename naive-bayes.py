@@ -26,9 +26,6 @@ def main(output_file=time.strftime('%h%d-%Hh%Mm')+'.csv', in_pkl=None):
     trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(in_pkl)
     logging.info("Loaded features, fitting model...")
     # Bernoulli Naive Bayes
-    ######
-    pdb.set_trace()
-    #####
     clf = BernoulliNB(alpha=1.0, binarize=None, fit_prior=True)
     clf.fit(trainFeatures,trainTargets)
     logging.info("Predicting...")

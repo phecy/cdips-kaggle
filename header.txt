@@ -1,0 +1,13 @@
+0	itemid
+1	category
+2	subcategory
+3	title
+4	description
+5	attrs
+6	price
+7	is_proved
+8	is_blocked
+9	phones_cnt
+10	emails_cnt
+11	urls_cnt
+12	close_hours

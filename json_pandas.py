@@ -8,8 +8,8 @@ import pandas as pd
 import sys
 
 def frac_blocked(df):
+   #Fraction of Blocked Ads by Category
    df_piv = pd.pivot_table(df,'subcategory','category','is_blocked',aggfunc='count')
-   # Fraction of Blocked Ads by Category
    df_piv['frac_blocked'] = df_piv.loc[:,1]/df_piv.loc[:,0]
    df_piv = df_piv.sort(columns='frac_blocked',ascending=False)
    # translate.google.com: 
@@ -20,8 +20,11 @@ def frac_blocked(df):
 
 def main(in_file='avito_train.tsv'):
    # Takes 1min on full training set
+   # category, subcategory, attr, is_blocked
    df = pd.read_csv(in_file, sep='\t', usecols=np.array([1,2,5,8]))
    frac_blocked(df)
+   # view totals in category/subcategory
+   print pd.pivot_table(df,'is_blocked','subcategory','category',aggfunc='count')
 
 if __name__='__main__':
     if len(sys.argv)>1:

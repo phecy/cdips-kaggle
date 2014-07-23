@@ -1,3 +1,4 @@
 http://en.wikipedia.org/wiki/Information_retrieval#Average_precision
+https://www.kaggle.com/wiki/MeanAveragePrecision
 http://en.wikipedia.org/wiki/Naive_Bayes_classifier#Document_classification
 http://en.wikipedia.org/wiki/Bayesian_spam_filtering

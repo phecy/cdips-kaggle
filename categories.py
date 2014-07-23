@@ -7,6 +7,7 @@ import os
 import pandas as pd
 from scipy import sparse
 from sklearn.externals import joblib
+from sklearn.linear_model import SGDClassifier
 import sys
 
 def indicator(df,label,noncollinear=False):

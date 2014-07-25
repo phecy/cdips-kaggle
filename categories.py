@@ -2,7 +2,6 @@
 '''
 Use pandas pivots to understand categories and json fields
 '''
-import ipdb
 import numpy as np
 import os
 import pandas as pd
@@ -46,16 +45,16 @@ def classify(dummy_train,dummy_test,data_folder,output_file):
            # only writes item_id per output spec, but may want to look at predicted_scores
             out_fid.write("%d\n" % (item_id))
 
-def main(train_file='avito_train.tsv',test_file='avito_test.tsv',data_folder='new-full-svm/'):
+def main(train_file='avito_train.tsv',test_file='avito_test.tsv',data_folder='new-feat-full/'):
    print 'Loading categories data frames...'
    df_train = pd.read_csv(train_file, sep='\t', usecols=np.array([1,2]))
    df_test = pd.read_csv(test_file, sep='\t', usecols=np.array([1,2]))
    # category
    print '_SPLIT CATEGORY_'
-   classify(indicator(df_train,'category'),indicator(df_test,'category'),data_folder,'category_split.csv')
+   classify(indicator(df_train,'category'),indicator(df_test,'category'),data_folder,'category_split_svm.csv')
    # subcategory
    print '_SPLIT SUBCATEGORY_'
-   classify(indicator(df_train,'subcategory'),indicator(df_test,'subcategory'),data_folder,'subcategory_split.csv')
+   classify(indicator(df_train,'subcategory'),indicator(df_test,'subcategory'),data_folder,'subcategory_split_svm.csv')
    # One classifier, but with subcategory as feature
    # print '_SUBCATEGORY AS FEATURE_'
    # indicator(df_train,'subcategory')

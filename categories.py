@@ -28,7 +28,7 @@ def classify(dummy_train,dummy_test,data_folder,output_file):
     predicted_ids = []
     predicted_scores = []
     # SGD Logistic Regression per sample 
-    clf = SGDClassifier(loss="svm",penalty="l2",alpha=1e-4,class_weight="auto")
+    clf = SGDClassifier(loss="hinge",penalty="l2",alpha=1e-4,class_weight="auto")
     for col in range(np.shape(dummy_train)[1]):
         # Get nonzero dummy indices as array
         idx_train = dummy_train[:,col].astype('bool').T.toarray()[0]

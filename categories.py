@@ -29,7 +29,7 @@ def classify(dummy_train,dummy_test,data_folder,output_file):
     predicted_ids = []
     predicted_scores = []
     # SGD Logistic Regression per sample 
-    clf = SGDClassifier(loss="log",penalty="l2",alpha=1e-4,class_weight="auto")
+    clf = SGDClassifier(loss="svm",penalty="l2",alpha=1e-4,class_weight="auto")
     for col in range(np.shape(dummy_train)[1]):
         # Get nonzero dummy indices as array
         idx_train = dummy_train[:,col].astype('bool').T.toarray()[0]
@@ -46,7 +46,7 @@ def classify(dummy_train,dummy_test,data_folder,output_file):
            # only writes item_id per output spec, but may want to look at predicted_scores
             out_fid.write("%d\n" % (item_id))
 
-def main(train_file='avito_train.tsv',test_file='avito_test.tsv',data_folder='new-feat-full/'):
+def main(train_file='avito_train.tsv',test_file='avito_test.tsv',data_folder='new-full-svm/'):
    print 'Loading categories data frames...'
    df_train = pd.read_csv(train_file, sep='\t', usecols=np.array([1,2]))
    df_test = pd.read_csv(test_file, sep='\t', usecols=np.array([1,2]))

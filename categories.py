@@ -35,8 +35,9 @@ def classify(dummy_train,dummy_test,data_folder,output_file):
         print 'Training subset {} of {}...'.format(col,np.shape(dummy_train)[1])
         clf.fit(trainFeatures[idx_train,:],trainTargets[idx_train])
        # Use probabilities instead of binary class prediction in order to generate a ranking    
+       # For SVM, this is the decision function (no probability output)
         idx_test = dummy_test[:,col].astype('bool').T.toarray()[0]
-        predicted_scores += clf.predict_proba(testFeatures[idx_test,:]).T[1].tolist()
+        predicted_scores += clf.decision_function(testFeatures[idx_test,:]).T[1].tolist()
         predicted_ids += testItemIds[idx_test].tolist()
     
     with open(os.path.join(data_folder,output_file),'w') as out_fid:

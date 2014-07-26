@@ -2,9 +2,15 @@
 """
 Modifying benchmark to:
     use Russian stemmer on description text (unused by default before)
+        append values from JSON text to title+description text
     add feature: boolean mixedLang for correctWord() eng-rus translation
-    add features: has_?, has_! (punctuation guidelines same for Russian)
-    add features: has_phone, has_url, has_email (>0 on count data)
+    add features: cnt_?, cnt_!, cnt_ellipsis (punctuation guidelines same for Russian)
+    add features: cnt_phone, cnt_url, cnt_email
+    add feature: frac_capital: fraction of capital letters
+    add feature: cnt_special: characters not in a-zA-Z/a-я/A-Я/0-9/whitespace/./?/!
+    add feature: len_ad: character count of title+description
+    add feature: price (raw)
+    -- store all as float instead of logical indices (including stem counts)
 """
 import csv
 import re

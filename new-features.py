@@ -81,19 +81,19 @@ def getItems(fileName):
             item = {featureName:featureValue.decode('utf-8') for featureName,featureValue in item.iteritems()}
             yield i, item
     
-def getWords(text, stemmRequired = False, correctWordRequired = False):
+def getWords(text, stemRequired = False, correctWordRequired = False):
     '''
     Splits the text into words, discards stop words and applies stemmer. 
     Parameters
     ----------
     text : str - initial string
-    stemmRequired : bool - flag whether stemming required
+    stemRequired : bool - flag whether stemming required
     correctWordRequired : bool - flag whether correction of words required     
     '''
     # Note: this is not a generator like getItems()
     # cleanText makes text lowercase, replaces with space if not English/Russian
     cleanText = re.sub(PATTERN_NONLOWER,' ',text.lower())
-    words = [w if not stemmRequired else stemmer.stem(w) for w in cleanText.split() if len(w)>1 and w not in stopwords]
+    words = [w if not stemRequired else stemmer.stem(w) for w in cleanText.split() if len(w)>1 and w not in stopwords]
     return words
 
 def processData(fileName,featureIndex={}):
@@ -119,14 +119,14 @@ def processData(fileName,featureIndex={}):
         has_json = item['attrs'].count(':')>0
         json_vals = ' '.join(json.loads(item['attrs']).values()) if has_json else ''
         text = ' '.join([item['title'],item['description'],json_vals])
-        text_unigram = getWords(text, stemmRequired = True);
+        desc_unigram = getWords(item['description'], stemRequired = True);
         # Make 2-grams (Note: does not account for punctuation, stopwords separating sequence)
-        text_twogram = map(' '.join,zip(text_unigram[:-1],text_unigram[1:]))
+        desc_twogram = map(' '.join,zip(desc_unigram[:-1],desc_unigram[1:]))
         if not featureIndex:
-            for ngram in text_unigram + text_twogram:
+            for ngram in getWords(text,stemRequired=True) + desc_twogram:
                 ngram_count[ngram] += 1
         else:
-            for ngram in set(getWords(text, stemmRequired = True)):
+            for ngram in set(getWords(text,stemRequired=True)):
                 if ngram in featureIndex:
                     col.append(featureIndex[ngram])
                     row.append(cur_row)
@@ -200,7 +200,6 @@ def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file='avito_train.tsv', te
     if not os.path.exists(os.path.join(data_folder,run_name)):
         os.makedirs(os.path.join(data_folder,run_name))
     joblib.dump((featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), os.path.join(data_folder,run_name,'train_data.pkl'))
-    featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(os.path.join(data_folder,run_name,'train_data.pkl'))
     logging.info('Feature preparation done. Output to {}/'.format(run_name))
                                
 if __name__=='__main__':            

@@ -6,25 +6,24 @@ Modifying benchmark to:
     add features: has_?, has_! (punctuation guidelines same for Russian)
     add features: has_phone, has_url, has_email (>0 on count data)
 """
-import csv
-import re
-import nltk.corpus
 from collections import defaultdict
-import scipy.sparse as sp
+import csv
+import datetime
+import ipdb
+import logging
+import nltk.corpus
+from nltk import SnowballStemmer
 import numpy as np
 import os
-from sklearn.linear_model import SGDClassifier
-from nltk import SnowballStemmer
+import pandas as pd
 import random as rnd 
-import logging
+import re
+import scipy.sparse as sp
+from sklearn.linear_model import SGDClassifier
 from sklearn.externals import joblib
 from sklearn.metrics import roc_auc_score
-import pdb
-import datetime
-import time
 import sys
-from scipy.sparse import lil_matrix
-import pandas as pd
+import time
 
 # assume data file resides in script directory
 dataFolder = "./"

@@ -23,6 +23,8 @@ import pdb
 import datetime
 import time
 import sys
+from scipy.sparse import lil_matrix
+import pandas as pd
 
 # assume data file resides in script directory
 dataFolder = "./"
@@ -104,7 +106,7 @@ def getWords(text, stemmRequired = False, correctWordRequired = False):
         words = [w if not stemmRequired else stemmer.stem(w) for w in cleanText.split() if len(w)>1 and w not in stopwords]
     return words
 
-def processData(fileName, featureIndexes={}, itemsLimit=None):
+def processData(fileName, featureIndexes={}, totalItems={}, itemsLimit=None):
     """ Processing data. """
     processMessage = ("Generate features for " if featureIndexes else "Generate features dict from ")+os.path.basename(fileName)
     logging.info(processMessage+"...")
@@ -112,22 +114,32 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
     wordCounts = defaultdict(lambda: 0)
     targets = []
     item_ids = []
+    local_wordCounts=[]
+    itemCountArr=[]
     # Rows are examples
     row = []
     # Cols are features (featureIndexes translates words to col numbers)
     col = []
     cur_row = 0
+    max_processedCnt = 0
     for processedCnt, item in getItems(fileName, itemsLimit):
+        max_processedCnt = max(processedCnt, max_processedCnt)
+	
         # First call: accumulate wordCounts. Next calls: iteratively create sparse row indices
         # Defaults are no stemming and no correction
         has_mixed_lang = False
+        curr_wordCounts = defaultdict(lambda: float(0))	
+
         #for word in getWords(item["title"]+" "+item["description"], stemmRequired = False, correctWordRequired = False):
         for word in getWords(item["title"]+" "+item["description"], stemmRequired = True, correctWordRequired = False):
+		
             if not featureIndexes:
                 wordCounts[word] += 1
             else:
                 if word in featureIndexes:
+                    curr_wordCounts[word] += 1
                     col.append(featureIndexes[word])
+                    itemCountArr.append(curr_wordCounts[word])				                    
                     row.append(cur_row)
             # Check for mixed Russian/English encoded words
             if not has_mixed_lang:
@@ -138,21 +150,33 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
         if featureIndexes:
             text = item["title"]+" "+item["description"]
             if text.count("?")>0:
+                  curr_wordCounts["has_?"] = text.count("?")
                   col.append(featureIndexes["has_?"])
+                  itemCountArr.append(curr_wordCounts[word])				                                      
                   row.append(cur_row)
             if text.count("!")>0:
+                  curr_wordCounts["has_!"] = text.count("!")
                   col.append(featureIndexes["has_!"])
+                  itemCountArr.append(curr_wordCounts[word])				                                                        
                   row.append(cur_row)
             if int(item["phones_cnt"])>0:
+                  curr_wordCounts["has_phone"] = int(item["phones_cnt"])
+                  itemCountArr.append(curr_wordCounts[word])				                                                        
                   col.append(featureIndexes["has_phone"])
                   row.append(cur_row)
             if int(item["urls_cnt"])>0:
+                  curr_wordCounts["has_url"] = int(item["urls_cnt"])
+                  itemCountArr.append(curr_wordCounts[word])				                                                        
                   col.append(featureIndexes["has_url"])
                   row.append(cur_row)
             if int(item["emails_cnt"])>0:
+                  curr_wordCounts["has_email"] = int(item["emails_cnt"])
+                  itemCountArr.append(curr_wordCounts[word])				                                                        
                   col.append(featureIndexes["has_email"])
                   row.append(cur_row)
             if has_mixed_lang:
+                  curr_wordCounts["has_mixed_lang"] = has_mixed_lang	
+                  itemCountArr.append(curr_wordCounts[word])				                                                        		
                   col.append(featureIndexes["has_mixed_lang"])
                   row.append(cur_row)
 
@@ -177,31 +201,49 @@ def processData(fileName, featureIndexes={}, itemsLimit=None):
         for newFeature in NEW_FEATURE_LIST:
             featureIndexes[newFeature]=index
             index += 1
-        return featureIndexes
+        return featureIndexes, processedCnt
     else:
+
+        # Create sparse matrix of feature occurrence
+        feature_occurrence = sp.csr_matrix((itemCountArr,(row,col)), shape=(cur_row, len(featureIndexes)), dtype=np.float64)
+
         # Create spare row matrix of features -- originally 0/1 not counts
         features = sp.csr_matrix((np.ones(len(row)),(row,col)), shape=(cur_row, len(featureIndexes)), dtype=np.float64)
-        if targets:
-            return features, targets, item_ids
-        else:
-            return features, item_ids
 
-def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file="avito_train.tsv", test_file="avito_test.tsv"):
+        if targets:
+            return features, targets, item_ids, feature_occurrence
+        else:
+            return features, item_ids, feature_occurrence
+
+def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file="avito_train_top100.tsv", test_file="avito_test_top100.tsv"):
     """ Generates features and fits classifier. 
     Input command line argument is optional run name, defaults to date/time.
     """
+    # get categories & itemIDs
+    df_train = pd.read_csv(train_file, sep='\t', usecols=np.array([0,1,2]))	
+    categories = df_train['category']
+    unique_categories = np.unique(df_train['category'])
+    itemIDs = df_train['itemid']	
+	
+	# map to itemIDs
+    itemID_to_category = defaultdict(lambda:0)
+    for i in range(len(itemIDs)):
+        itemID_to_category[itemIDs[i]] = categories[i]
+
+	
    ## This block is used to dump the feature pickle, called only once on a given train/test set. 
    ## joblib replaces standard pickle load to work well with large data objects
    ####
    # featureIndexes are words/numbers in description/title linked to sequential numerical indices
    # Note: Sampling 100 rows takes _much_ longer than using a 100-row input file
-    featureIndexes = processData(os.path.join(dataFolder,train_file))
+    featureIndexes, processedCnt = processData(os.path.join(dataFolder,train_file))
     # Targets refers to ads with is_blocked
    # trainFeatures is sparse matrix of [m-words x n-examples], Targets is [nx1] binary, ItemIds are ad index (for submission)
    # only ~7.6 new words (not stems) per ad. Matrix is 96.4% zeros.
-    trainFeatures,trainTargets,trainItemIds = processData(os.path.join(dataFolder,train_file), featureIndexes)
+    trainFeatures,trainTargets,trainItemIds, feature_occurrence = processData(os.path.join(dataFolder,train_file), featureIndexes, processedCnt)
+	
    # Recall, we are predicting testTargets
-    testFeatures,testItemIds = processData(os.path.join(dataFolder,test_file), featureIndexes)
+    testFeatures,testItemIds, feature_occurrence = processData(os.path.join(dataFolder,test_file), featureIndexes)
     if not os.path.exists(os.path.join(dataFolder,run_name)):
         os.makedirs(os.path.join(dataFolder,run_name))
     joblib.dump((trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), os.path.join(dataFolder,run_name,"train_data.pkl"))

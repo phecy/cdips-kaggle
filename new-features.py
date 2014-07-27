@@ -115,9 +115,12 @@ def processData(fileName,featureIndex={}):
         # Current example's word counts: previously had global (ad corpus) ngram_count
         # This dict constructor says that when a key does not exist, add it to the dict with value 0
         ngram_count_row = defaultdict(lambda: 0)
-        # Add JSON text values
-        has_json = item['attrs'].count(':')>0
-        json_vals = ' '.join(json.loads(item['attrs']).values()) if has_json else ''
+        # Add JSON text values (checks if json module can decode)
+        try:
+            json_vals = ' '.join(json.loads(item['attrs']).values())
+            has_json = 1
+        except:
+            has_json = 0
         text = ' '.join([item['title'],item['description'],json_vals])
         desc_unigram = getWords(item['description'], stemRequired = True);
         # Make 2-grams (Note: does not account for punctuation, stopwords separating sequence)

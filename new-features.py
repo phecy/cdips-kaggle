@@ -178,7 +178,7 @@ def processData(fileName,featureIndex={}):
             index += 1
         return featureIndex
     else:
-        # Create spare row matrix of features -- originally 0/1 not counts
+        # Create sparse row matrix of features -- originally 0/1 not counts
         features = sp.csr_matrix((val,(row,col)), shape=(cur_row, len(featureIndex)), dtype=np.float64)
         if targets:
             return features, targets, item_ids

@@ -214,10 +214,7 @@ def processData(fileName, featureIndexes={}, totalItems={}, itemsLimit=None):
         else:
             return features, item_ids, feature_occurrence
 
-def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file="avito_train_top100.tsv", test_file="avito_test_top100.tsv"):
-    """ Generates features and fits classifier. 
-    Input command line argument is optional run name, defaults to date/time.
-    """
+def map_cats_toIDs(train_file):
     # get categories & itemIDs
     df_train = pd.read_csv(train_file, sep='\t', usecols=np.array([0,1,2]))	
     categories = df_train['category']
@@ -228,7 +225,32 @@ def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file="avito_train_top100.t
     itemID_to_category = defaultdict(lambda:0)
     for i in range(len(itemIDs)):
         itemID_to_category[itemIDs[i]] = categories[i]
+    return itemID_to_category, unique_categories
 
+def reorder_feature_occurrence_mat(train_file, feature_occurrence,trainItemIds):
+    itemID_to_category, unique_categories=map_cats_toIDs(train_file)
+    f = open(os.path.join(dataFolder,"sorted_occurrence_mat.csv"), "w")
+    # find items that map to categories & reorder feature_occurrence
+    cat_count =0
+    for cat in unique_categories:
+        for item, mapped_cat in itemID_to_category.iteritems():
+            if cat in mapped_cat:
+                   result = feature_occurrence.getrow(trainItemIds.index(item)).toarray()
+                   whereAreNaNs = np.isnan(result);
+                   result[whereAreNaNs] = 0
+                   print_result=np.append(cat_count, result)		   
+                   for r in range(print_result.shape[0]):
+				       f.write("%0.3f \t" % print_result[r])
+                   f.write("\n")
+    cat_count += 1
+    f.close()        
+
+
+
+def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file="avito_train.tsv", test_file="avito_test.tsv"):
+    """ Generates features and fits classifier. 
+    Input command line argument is optional run name, defaults to date/time.
+    """
 	
    ## This block is used to dump the feature pickle, called only once on a given train/test set. 
    ## joblib replaces standard pickle load to work well with large data objects
@@ -240,39 +262,41 @@ def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file="avito_train_top100.t
    # trainFeatures is sparse matrix of [m-words x n-examples], Targets is [nx1] binary, ItemIds are ad index (for submission)
    # only ~7.6 new words (not stems) per ad. Matrix is 96.4% zeros.
     trainFeatures,trainTargets,trainItemIds, feature_occurrence = processData(os.path.join(dataFolder,train_file), featureIndexes, processedCnt)
+
+    reorder_feature_occurrence_mat(train_file, feature_occurrence,trainItemIds)
 	
    # Recall, we are predicting testTargets
-    testFeatures,testItemIds, feature_occurrence = processData(os.path.join(dataFolder,test_file), featureIndexes)
-    if not os.path.exists(os.path.join(dataFolder,run_name)):
-        os.makedirs(os.path.join(dataFolder,run_name))
-    joblib.dump((trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), os.path.join(dataFolder,run_name,"train_data.pkl"))
+   # testFeatures,testItemIds, feature_occurrence = processData(os.path.join(dataFolder,test_file), featureIndexes)
+   # if not os.path.exists(os.path.join(dataFolder,run_name)):
+   #     os.makedirs(os.path.join(dataFolder,run_name))
+   # joblib.dump((trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), os.path.join(dataFolder,run_name,"train_data.pkl"))
    ####
-    trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(os.path.join(dataFolder,run_name,"train_data.pkl"))
-    logging.info("Feature preparation done, fitting model...")
+   # trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(os.path.join(dataFolder,run_name,"train_data.pkl"))
+   # logging.info("Feature preparation done, fitting model...")
     # Stochastic Gradient Descent training used (online learning)
     # loss (cost) = log ~ Logistic Regression
     # L2 norm used for cost, alpha defines learning rate
-    clf = SGDClassifier(    loss="log", 
+   # clf = SGDClassifier(    loss="log", 
                             penalty="l2", 
                             alpha=1e-4, 
                             class_weight="auto")
-    clf.fit(trainFeatures,trainTargets)
+   # clf.fit(trainFeatures,trainTargets)
 
-    logging.info("Predicting...")
+    #logging.info("Predicting...")
    # Use probabilities instead of binary class prediction in order to generate a ranking    
-    predicted_scores = clf.predict_proba(testFeatures).T[1]
+    #predicted_scores = clf.predict_proba(testFeatures).T[1]
     
-    logging.info("Write results...")
-    output_file = "output-item-ranking.csv"
-    logging.info("Writing submission to %s" % output_file)
-    f = open(os.path.join(dataFolder,run_name,output_file), "w")
-    f.write("id\n")
-    
-    for pred_score, item_id in sorted(zip(predicted_scores, testItemIds), reverse = True):
-       # only writes item_id per output spec, but may want to look at predicted_scores
-        f.write("%d\n" % (item_id))
-    f.close()
-    logging.info("Done.")
+    #logging.info("Write results...")
+    #output_file = "output-item-ranking.csv"
+    #logging.info("Writing submission to %s" % output_file)
+    #f = open(os.path.join(dataFolder,run_name,output_file), "w")
+    #f.write("id\n")
+   # 
+    #for pred_score, item_id in sorted(zip(predicted_scores, testItemIds), reverse = True):
+    #   # only writes item_id per output spec, but may want to look at predicted_scores
+    #    f.write("%d\n" % (item_id))
+    #f.close()
+    #logging.info("Done.")
                                
 if __name__=="__main__":            
     tstart = time.time()

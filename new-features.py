@@ -31,6 +31,10 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import roc_auc_score
 import sys
 import time
+import pandas as pd
+import gensim
+from gensim import corpora, models, similarities
+
 
 # assume data file resides in script directory
 data_folder = './'
@@ -180,12 +184,41 @@ def processData(fileName,featureIndex={}):
     else:
         # Create sparse row matrix of features -- originally 0/1 not counts
         features = sp.csr_matrix((val,(row,col)), shape=(cur_row, len(featureIndex)), dtype=np.float64)
+        featuresIndexed = (row,col, val)
         if targets:
-            return features, targets, item_ids
+            return features, targets, item_ids, featuresIndexed
         else:
-            return features, item_ids
+            return features, item_ids, featuresIndexed
 
-def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file='avito_train.tsv', test_file='avito_test.tsv'):
+def DimReduction(SparseMatFeatures, DR_type, NumDims):
+# performs dimension reduction using gensim library
+# INPUT: sparse matrix, type of reduction desired ('tfidf', 'lda','lsi'), and desired number of reduced dims 
+# OUTPUT: sparse dimension reduced & normalized matrix (if 'tfidf', then not reduced but returns
+#         matrix where new values reflects term frequency in ad that is offset by the global frequency
+#         of the word in all ads)
+
+    corpus = gensim.matutils.Sparse2Corpus(SparseMatFeatures.transpose(copy=False))
+    tfidf = models.TfidfModel(corpus) 
+    corpus_tfidf = tfidf[corpus]
+
+    if (DR_type == 'tfidf'):
+       scipy_csc_matrix = gensim.matutils.corpus2csc(corpus_tfidf)     
+        
+    if (DR_type == 'lda'):        
+       lda = models.LdaModel(corpus_tfidf, num_topics=NumDims)
+       corpus_lda = lsi[corpus_tfidf]  
+       scipy_csc_matrix = gensim.matutils.corpus2csc(corpus_lda)          
+     
+    if (DR_type == 'lsi'):        
+       lsi = models.LsiModel(corpus_tfidf, num_topics=NumDims)
+       corpus_lsi = lsi[corpus_tfidf]
+       scipy_csc_matrix = gensim.matutils.corpus2csc(corpus_lsi) 
+
+    scipy_csc_matrix = scipy_csc_matrix.transpose(copy=True)
+    return scipy_csc_matrix
+
+def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file='avito_train_top100.tsv', test_file='avito_test_top100.tsv'):
+
     ''' Generates features and fits classifier. 
     Input command line argument is optional run name, defaults to date/time.
     '''
@@ -197,7 +230,18 @@ def main(run_name=time.strftime('%h%d-%Hh%Mm'), train_file='avito_train.tsv', te
    # Targets refers to ads with is_blocked
    # trainFeatures is sparse matrix of [m-words x n-examples], Targets is [nx1] binary, ItemIds are ad index (for submission)
    # only ~7.6 new words (not stems) per ad. Matrix is 96.4% zeros.
-    trainFeatures,trainTargets,trainItemIds = processData(os.path.join(data_folder,train_file), featureIndex)
+    trainFeatures,trainTargets,trainItemIds,featuresIndexed = processData(os.path.join(data_folder,train_file), featureIndex)
+
+    # DimReduction 
+    # employs gensim library to perform dimension reduction on trainFeatures    
+    # INPUT: sparse matrix, type of reduction desired ('tfidf', 'lda','lsi'), and desired number of reduced dims 
+    # OUTPUT: sparse dimension reduced & normalized matrix (if 'tfidf', then not reduced but returns
+    #         matrix where new values reflects term frequency in ad that is offset by the global frequency
+    #         of the word in all ads)
+    
+    NUM_DIMS = 100
+    trainFeaturesDR = DimReduction(trainFeatures, 'lsi', NUM_DIMS)
+    
    # Recall, we are predicting testTargets
     testFeatures,testItemIds = processData(os.path.join(data_folder,test_file), featureIndex)
     if not os.path.exists(os.path.join(data_folder,run_name)):

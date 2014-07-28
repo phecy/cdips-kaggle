@@ -20,6 +20,7 @@ import random as rnd
 import logging
 from sklearn.externals import joblib
 from sklearn.metrics import roc_auc_score
+from sklearn.metrics import confusion_matrix
 from sklearn.utils import shuffle
 from sklearn import cross_validation
 import pdb
@@ -65,26 +66,14 @@ def main(run_name=time.strftime("%d_%H%M"), train_file="avito_train.tsv", test_f
     clf = SGDClassifier(loss="log",penalty="l2",alpha=1e-4,class_weight="auto")
     
     #Cross validation split and calculation of accuracy
-    cv = cross_validation.ShuffleSplit(len(trainItemIds), n_iter=10, train_size=0.6, random_state=0)
+    kf_total = cross_validation.KFold(len(trainItemIds),n_folds=10,shuffle=True,indices=True)
+    
+   # cv = cross_validation.ShuffleSplit(len(trainItemIds), n_iter=10, train_size=0.6, random_state=0)
     trainTargets_new = np.asarray(trainTargets)          
-    test_scores = cross_validation.cross_val_score(clf, X=trainFeatures, y=trainTargets_new, cv=cv)    
-    print("Accuracy: %0.4f " % (test_scores.mean()))
-    logging.info("Predicting...")
-   # Use probabilities instead of binary class prediction in order to generate a ranking   
-    clf.fit(trainFeatures,trainTargets)
-    predicted_scores = clf.predict_proba(testFeatures).T[1]
+    test_scores = cross_validation.cross_val_score(clf, X=trainFeatures, y=trainTargets_new, cv=kf_total,n_jobs=1)    
+    print(test_scores)
+    logging.info("Done with cross-validation")
     
-    logging.info("Write results...")
-    output_file = "output-item-ranking.csv"
-    logging.info("Writing submission to %s" % output_file)
-    f = open(os.path.join(dataFolder,run_name+output_file), "w")
-    f.write("id\n")
-    
-    for pred_score, item_id in sorted(zip(predicted_scores, testItemIds), reverse = True):
-       # only writes item_id per output spec, but may want to look at predicted_scores
-        f.write("%d\n" % (item_id))
-    f.close()
-    logging.info("Done.")
                                
 if __name__=="__main__":            
     tstart = time.time()

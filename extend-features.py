@@ -20,7 +20,7 @@ from scipy import sparse
 from sklearn.externals import joblib
 import sys
 
-def write_featureIndex(featureIndex,out_filename='featureIndex.tsv'):
+def write_featureIndex(featureIndex,out_filename):
     with open(out_filename,'w') as out_fid:
         for feature in sorted(featureIndex.iteritems(), key=operator.itemgetter(1)):
             out_fid.write(feature[0]+'\t'+str(feature[1])+'\n')
@@ -50,6 +50,8 @@ def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Ju
    #------------------------
    ipdb.set_trace()
    #------------------------
+   print 'Writing feature names...'
+   write_featureIndex(featureIndex,os.path.splitext(feature_pkl)+'_featlist.tsv')
    print 'Loading categories data frames...'
    df_test = pd.read_csv(test_file, sep='\t', usecols=np.array([1,2]))
    for feat_mat,source_file in zip((trainFeatures,testFeatures),(train_file,test_file)):

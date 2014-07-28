@@ -34,7 +34,11 @@ def DimReduction(SparseMatFeatures,DR_type,NumDims):
 
 def main(feature_pkl,DR_type='lsi',NumDims=100):
     # Reconstrunct features from .pkl saved by new-features.py
-    featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
+    # Handle output before heading names (featureIndex) were added to .pkl
+    if feature_pkl.find('new-feat')>0:
+        trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
+    else:
+        featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
     trainFeaturesDR = DimReduction(trainFeatures,DR_type,NumDims)
     # Dump new features to same directory as source
     output_base = os.path.splitext(feature_pkl)[0]+'_'.join(DR_type,str(NumDims))+'.pkl'
@@ -42,6 +46,6 @@ def main(feature_pkl,DR_type='lsi',NumDims=100):
 
 if __name__=='__main__':
     if len(sys.argv)>1:
-        main(sys.argv[1:])
+        main(*sys.argv[1:])
     else:
         print 'USAGE: python dimred.py [path-to-feature.pkl] <DR_type (tfidf,lda,lsi)> <number of dimensions/topics>'

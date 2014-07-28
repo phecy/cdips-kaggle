@@ -34,6 +34,7 @@ def DimReduction(SparseMatFeatures,DR_type,NumDims):
 
 def main(feature_pkl,DR_type='lsi',NumDims=100):
     # Reconstrunct features from .pkl saved by new-features.py
+    NumDims = int(NumDims)
     # Handle output before heading names (featureIndex) were added to .pkl
     if feature_pkl.find('new-feat')>0:
         trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)

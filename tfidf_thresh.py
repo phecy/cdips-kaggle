@@ -4,10 +4,10 @@ Threshold the ngram features run on tfidf score
 (eliminate unimportant features that make even sparse matrix unwieldy)
 '''
 from dimred import DimReduction
-from extend-features import write_featureIndex
+from extend_features import write_featureIndex
 import ipdb
 import matplotlib.pyplot as plt
-from new-features import NEW_FEATURE_LIST
+from new_features import NEW_FEATURE_LIST
 import numpy as np
 import operator
 import os

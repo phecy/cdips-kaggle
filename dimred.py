@@ -41,7 +41,7 @@ def main(feature_pkl,DR_type='lsi',NumDims=100):
     joblib.dump(trainFeaturesDR,output_base+'.pkl')
 
 if __name__=='__main__':
-    if len(sys.argv>1):
+    if len(sys.argv)>1:
         main(sys.argv[1:])
     else:
         print 'USAGE: python dimred.py [path-to-feature.pkl] <DR_type (tfidf,lda,lsi)> <number of dimensions/topics>'

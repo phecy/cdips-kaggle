@@ -46,7 +46,7 @@ def dummy_price_cross(df,label,price):
 
 def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Jul27-15h27m/train_data.pkl'):
    print 'Loading features pickle...'
-   featureIndexes, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
+   featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
    #------------------------
    ipdb.set_trace()
    #------------------------
@@ -59,9 +59,9 @@ def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Ju
        for label in ('category','subcategory'):
            dpc_sp,dpc_label = dummy_price_cross(df, label, feat_mat[:,featureIndex['price']].toarray())
            feat_mat = sparse.hstack(feat_mat,dpc_sp)
-           featureIndexes += dpc_label
+           featureIndex += dpc_label
    out_pkl = os.path.splitext(feature_pkl)+'_xprice.pkl'
-   joblib.dump(out_pkl,(featureIndexes, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds))
+   joblib.dump(out_pkl,(featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds))
 
 if __name__=='__main__':
     if len(sys.argv)>1:

@@ -30,7 +30,7 @@ def elim_exp_zeros(ngram_train):
     return sparse.coo_matrix((ngram_coo.data[non0],(ngram_coo.row[non0],ngram_coo.col[non0])), shape=ngram_coo.shape).tocsc()
 
 def thresh_elim_cols(mat,featureIndex,threshold=None):
-    if not threshold:
+    if threshold is None:
         threshold = mat.min()
     keep_idx = np.array(mat.sum(axis=0).tolist()[0]) >= threshold
     features,indices = zip(*sorted(featureIndex.iteritems(), key=operator.itemgetter(1)))
@@ -46,6 +46,9 @@ def main(feature_pkl='Jul27-15h27m/train_data.pkl',threshold=None):
     ngram_train = trainFeatures[:,:-len(NEW_FEATURE_LIST)]
     # Eliminate explicit zeros and uniformly zero columns
     ngram_train = elim_exp_zeros(ngram_train)
+    #_______________________________________
+    ipdb.set_trace()
+    #```````````````````````````````````````
     ngram_train, nzIndex, tmp = thresh_elim_cols(ngram_train,featureIndex,0)
     # Calculate TF-IDF
     tfidf = DimReduction(ngram_train,'tfidf')

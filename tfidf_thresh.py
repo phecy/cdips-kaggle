@@ -71,7 +71,7 @@ def main(threshold,feature_pkl='Jul27-15h27m/train_data.pkl'):
     # Add non-ngram feature labels
     for label in NEW_FEATURE_LIST:
         reducedIndex[label]=index
-            index+=1
+        index+=1
     # Write new output pkl
     out_pkl = os.path.splitext(feature_pkl)+'_tfidf-thresh.pkl'
     joblib.dump(out_pkl,(reducedIndex, trainReduced, trainTargets, trainItemIds, testReduced, testItemIds))

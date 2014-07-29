@@ -4,7 +4,7 @@ import os
 from sklearn.externals import joblib
 import sys
 
-def DimReduction(SparseMatFeatures,DR_type,NumDims):
+def DimReduction(SparseMatFeatures,DR_type,NumDims=None):
     '''
     performs dimension reduction using gensim library
     INPUT: sparse matrix, type of reduction desired ('tfidf', 'lda','lsi'), and desired number of reduced dims 

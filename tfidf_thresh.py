@@ -1,6 +1,6 @@
 # coding : utf-8
 '''
-Threshold the ngram features run on tfidf score
+Threshold the neerray(tfidf_sum.tolist())gram features run on tfidf score
 (eliminate unimportant features that make even sparse matrix unwieldy)
 '''
 from dimred import DimReduction
@@ -27,8 +27,13 @@ def main(threshold,feature_pkl='Jul27-15h27m/train_data.pkl'):
     #------------------------
     #Exclude non-ngram features
     ngram_train = trainFeatures[:,:-len(NEW_FEATURE_LIST)]
+    #Need to set explicit zeros to epsilon to avoid explicit 0 in tfidf
+    #without chaging column names via prune()
+    ngram_coo = ngram_train.tocoo()
+    non0 = ngram_coo.data>0
+    ngram_train = sparse.coo_matrix((ngram_coo.data[non0],(ngram_coo.row[non0],ngram_coo.col[non0])), shape=ngram_coo.shape).tocsc()
     ngram_train = DimReduction(ngram_train,'tfidf')
-    tfidf_sum = sum(ngram_train).toarray()
+    tfidf_sum = np.array(ngram_train.sum(axis=0).tolist())
     write_hist(tfidf_sum,'train_tfidf_hist.png')
 
     keep_idx = tfidf_sum>threshold

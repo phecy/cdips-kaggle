@@ -11,6 +11,7 @@ Add the following features to the new-feat-full/train_data.pkl set:
         This will scale price to individual categories via cross features
 
 '''
+import codecs
 import ipdb
 import numpy as np
 import operator
@@ -21,9 +22,10 @@ from sklearn.externals import joblib
 import sys
 
 def write_featureIndex(featureIndex,out_filename):
-    with open(out_filename,'w') as out_fid:
+    # Still tries to encode as ascii upon write
+    with codecs.open(out_filename,'w','utf-8') as out_fid:
         for feature in sorted(featureIndex.iteritems(), key=operator.itemgetter(1)):
-            out_fid.write(feature[0]+'\t'+str(feature[1])+'\n')
+            out_fid.write(feature[0]+u'\t'+str(z[1]).decode('utf-8')+u'\n')
 
 def indicator(df,label,noncollinear=False):
     # Make csr dummy variable from categorical label

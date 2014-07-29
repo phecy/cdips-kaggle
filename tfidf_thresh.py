@@ -39,11 +39,12 @@ def thresh_elim_cols(mat,featureIndex,threshold=None):
         return mat[:,keep_idx], nzIndex, keep_idx
    
 def main(feature_pkl='Jul27-15h27m/train_data.pkl',threshold=None):
-    if threshold:
+    if threshold is not None:
         threshold = float(threshold)
     print 'Loading features pickle...'
     featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
     # Exclude non-ngram features
+    print 'Preparing features for TF-IDF...'
     ngram_train = trainFeatures[:,:-len(NEW_FEATURE_LIST)]
     # Eliminate explicit zeros and uniformly zero columns
     ngram_train = elim_exp_zeros(ngram_train)

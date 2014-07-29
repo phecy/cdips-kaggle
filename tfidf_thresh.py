@@ -26,27 +26,11 @@ def elim_exp_zeros(ngram_train):
     non0 = ngram_coo.data>0
     return sparse.coo_matrix((ngram_coo.data[non0],(ngram_coo.row[non0],ngram_coo.col[non0])), shape=ngram_coo.shape).tocsc()
 
-def elim_zero_cols(ngram_train,featureIndex):
-    keep_idx = np.array(ngram_train.sum(axis=0).tolist()[0])>0
-    keep_arr = np.nonzero(keep_idx)[0]
-    nzIndex = {} 
-    index=0
-    for item in featureIndex.iteritems():
-        if item[1] in keep_arr:
-            nzIndex[item[0]]=index
-            index+=1
+def thresh_elim_cols(ngram_train,featureIndex,threshold=0):
+    keep_idx = np.array(ngram_train.sum(axis=0).tolist()[0]) > threshold
+    features,indices = zip(*sorted(featureIndex.iteritems(), key=operator.itemgetter(1)))
+    nzIndex = dict((k,i) for k,i in enumerate(np.array(features)[keep_idx]))
     return ngram_train[:,keep_idx], nzIndex
-
-def thresh_cols(tfidf_sum,threshold,featureIndex):
-    keep_idx = tfidf_sum>threshold
-    keep_arr = np.nonzero(keep_idx)
-    reducedIndex = {}
-    index=0
-    for item in featureIndex.iteritems():
-        if item[1] in keep_arr:
-            reducedIndex[item[0]]=index
-            index+=1
-    return keep_idx, reducedIndex
    
 def main(threshold,feature_pkl='Jul27-15h27m/train_data.pkl'):
     threshold = float(threshold)
@@ -59,20 +43,20 @@ def main(threshold,feature_pkl='Jul27-15h27m/train_data.pkl'):
     #--
     # Eliminate explicit zeros and uniformly zero columns
     ngram_train = elim_exp_zeros(ngram_train)
-    ngram_train, nzIndex = elim_zero_cols(ngram_train,featureIndex)
+    ngram_train, nzIndex = thresh_elim_cols(ngram_train,featureIndex,0)
     # Calculate TF-IDF
-    ngram_train = DimReduction(ngram_train,'tfidf')
-    tfidf_sum = np.array(ngram_train.sum(axis=0).tolist()[0])
+    tfidf = DimReduction(ngram_train,'tfidf')
+    tfidf_sum = np.array(tfidf.sum(axis=0).tolist()[0])
     write_hist(tfidf_sum,'train_tfidf_hist.png')
     # threshold the columns on TF-IDF sums
-    keep_idx, reducedIndex = thresh_cols(tfidf_sum,threshold,nzIndex)
+    keep_idx, reducedIndex = thresh_elim_cols(tfidf_sum,nzIndex,threshold)
     # Stack the reduced features to the non-gram columns
     trainReduced = sparse.hstack(trainFeatures[:,keep_idx],trainFeatures[:,len(NEW_FEATURE_LIST):])
     testReduced = sparse.hstack(testFeatures[:,keep_idx],testFeatures[:,len(NEW_FEATURE_LIST):])
     # Add non-ngram feature labels
-    for label in NEW_FEATURE_LIST:
-        reducedIndex[label]=index
-        index+=1
+    end = len(reducedIndex)
+    for label,i in enumerate(NEW_FEATURE_LIST):
+        reducedIndex[label]=end+i
     # Write new output pkl
     out_pkl = os.path.splitext(feature_pkl)+'_tfidf-thresh.pkl'
     joblib.dump(out_pkl,(reducedIndex, trainReduced, trainTargets, trainItemIds, testReduced, testItemIds))

@@ -27,9 +27,10 @@ def elim_exp_zeros(ngram_train):
     return sparse.coo_matrix((ngram_coo.data[non0],(ngram_coo.row[non0],ngram_coo.col[non0])), shape=ngram_coo.shape).tocsc()
 
 def elim_zero_cols(ngram_train,featureIndex):
-    keep_idx = ngram_train.sum(axis=0)>0
-    keep_arr = np.nonzero(keep_idx)
+    keep_idx = np.array(ngram_train.sum(axis=0).tolist()[0])>0
+    keep_arr = np.nonzero(keep_idx)[0]
     nzIndex = {} 
+    index=0
     for item in featureIndex.iteritems():
         if item[1] in keep_arr:
             nzIndex[item[0]]=index

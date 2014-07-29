@@ -19,8 +19,7 @@ from nltk import SnowballStemmer
 import random as rnd 
 import logging
 from sklearn.externals import joblib
-from sklearn.metrics import roc_auc_score
-from sklearn.metrics import confusion_matrix
+from sklearn import metrics
 from sklearn.utils import shuffle
 from sklearn import cross_validation
 import pdb
@@ -28,7 +27,7 @@ import datetime
 import time
 import pandas as pd
 import sys
-import os
+import matplotlib.pyplot as plt
 
 # assume data file resides in script directory
 dataFolder = "C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kaggle\\"
@@ -69,9 +68,31 @@ def main(run_name=time.strftime("%d_%H%M"), train_file="avito_train.tsv", test_f
     kf_total = cross_validation.KFold(len(trainItemIds),n_folds=10,shuffle=True,indices=True)
     
    # cv = cross_validation.ShuffleSplit(len(trainItemIds), n_iter=10, train_size=0.6, random_state=0)
-    trainTargets_new = np.asarray(trainTargets)          
-    test_scores = cross_validation.cross_val_score(clf, X=trainFeatures, y=trainTargets_new, cv=kf_total,n_jobs=1)    
-    print(test_scores)
+    trainTargets_new = np.asarray(trainTargets)
+    count = 0
+    fig = plt.figure(figsize=(14,10))
+    plt.clf()
+    for train_indices, test_indices in kf_total:
+        predicted_values = clf.fit(trainFeatures[train_indices], trainTargets_new[train_indices]).predict(trainFeatures[test_indices])
+        conf_arr = metrics.confusion_matrix(trainTargets_new[test_indices],predicted_values)
+        norm_conf = []        
+        for i in conf_arr:
+            a = 0
+            tmp_arr = []
+            a = sum(i, 0)
+            for j in i:
+                tmp_arr.append(float(j)/float(a))
+            norm_conf.append(tmp_arr)
+        ax = fig.add_subplot(4,3,count)
+        ax.set_aspect(1)
+        ax.matshow(np.array(norm_conf), cmap=plt.cm.jet, 
+                interpolation='nearest')
+        print "Finished with fold number " + str(count)
+        count += 1
+    #test_scores = cross_validation.cross_val_score(clf, X=trainFeatures, y=trainTargets_new, cv=kf_total,n_jobs=1)    
+    #print(test_scores)
+    #print("Mean Accuracy across 10-fold = " + str(test_scores.mean()))
+    
     logging.info("Done with cross-validation")
     
                                

@@ -62,7 +62,7 @@ def main(threshold,feature_pkl='Jul27-15h27m/train_data.pkl'):
     ngram_train, nzIndex = elim_zero_cols(ngram_train,featureIndex)
     # Calculate TF-IDF
     ngram_train = DimReduction(ngram_train,'tfidf')
-    tfidf_sum = np.array(ngram_train.sum(axis=0).tolist())
+    tfidf_sum = np.array(ngram_train.sum(axis=0).tolist()[0])
     write_hist(tfidf_sum,'train_tfidf_hist.png')
     # threshold the columns on TF-IDF sums
     keep_idx, reducedIndex = thresh_cols(tfidf_sum,threshold,nzIndex)

@@ -30,7 +30,7 @@ def elim_zero_cols(ngram_train,featureIndex):
     keep_idx = ngram_train.sum(axis=0)>0
     keep_arr = np.nonzero(keep_idx)
     nzIndex = {} 
-    for item in featureIndex.iteritems()
+    for item in featureIndex.iteritems():
         if item[1] in keep_arr:
             nzIndex[item[0]]=index
             index+=1
@@ -41,13 +41,14 @@ def thresh_cols(tfidf_sum,threshold,featureIndex):
     keep_arr = np.nonzero(keep_idx)
     reducedIndex = {}
     index=0
-    for item in featureIndex.iteritems()
+    for item in featureIndex.iteritems():
         if item[1] in keep_arr:
             reducedIndex[item[0]]=index
             index+=1
     return keep_idx, reducedIndex
    
 def main(threshold,feature_pkl='Jul27-15h27m/train_data.pkl'):
+    threshold = float(threshold)
     print 'Loading features pickle...'
     featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
     # Exclude non-ngram features

@@ -25,7 +25,7 @@ def write_featureIndex(featureIndex,out_filename):
     # Still tries to encode as ascii upon write
     with codecs.open(out_filename,'w','utf-8') as out_fid:
         for feature in sorted(featureIndex.iteritems(), key=operator.itemgetter(1)):
-            out_fid.write(feature[0]+u'\t'+str(z[1]).decode('utf-8')+u'\n')
+            out_fid.write(feature[0]+u'\t'+unicode(z[1])+u'\n')
 
 def indicator(df,label,noncollinear=False):
     # Make csr dummy variable from categorical label
@@ -33,7 +33,7 @@ def indicator(df,label,noncollinear=False):
     dummy = pd.get_dummies(df[label])
     if noncollinear:
         dummy = dummy.drop(dummy.columns[-1])
-    return sparse.csr_matrix(dummy), dummy.labels
+    return sparse.csc_matrix(dummy), dummy.labels
 
 def dummy_price_cross(df,label,price):
    # Return (sparse matrix of indicator - indicator*price data, labels for this data)
@@ -46,14 +46,12 @@ def dummy_price_cross(df,label,price):
    sp_cross = sp_dummy.multiply(np.tile(price,shape(sp_dummy)[1]).T)
    return sparse.hstack(sp_dummy,sp_cross), dummy_label+new_label
 
-def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Jul27-15h27m/train_data.pkl'):
+def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Jul27-15h27m/train_tfidf.pkl'):
    print 'Loading features pickle...'
    featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
    #------------------------
    ipdb.set_trace()
    #------------------------
-   print 'Writing feature names...'
-   write_featureIndex(featureIndex,os.path.splitext(feature_pkl)+'_featlist.tsv')
    print 'Loading categories data frames...'
    df_test = pd.read_csv(test_file, sep='\t', usecols=np.array([1,2]))
    for feat_mat,source_file in zip((trainFeatures,testFeatures),(train_file,test_file)):
@@ -61,9 +59,13 @@ def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Ju
        for label in ('category','subcategory'):
            dpc_sp,dpc_label = dummy_price_cross(df, label, feat_mat[:,featureIndex['price']].toarray())
            feat_mat = sparse.hstack(feat_mat,dpc_sp)
-           featureIndex += dpc_label
+           end = len(featureIndex)
+           for i,k in enumerate(dpc_label):
+               featureIndex[k] = end+i
    out_pkl = os.path.splitext(feature_pkl)+'_xprice.pkl'
-   joblib.dump(out_pkl,(featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds))
+   joblib.dump((featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), out_pkl)
+   print 'Writing feature names...'
+   write_featureIndex(featureIndex,os.path.splitext(feature_pkl)+'_featlist.tsv')
 
 if __name__=='__main__':
     if len(sys.argv)>1:

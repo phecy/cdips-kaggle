@@ -124,11 +124,12 @@ def processData(fileName,featureIndex={}):
         text = ' '.join([item['title'],item['description'],json_vals])
         desc_unigram = getWords(item['description'], stemRequired = True);
         # Make 2-grams (Note: does not account for punctuation, stopwords separating sequence)
-        desc_twogram = map(' '.join,zip(desc_unigram[:-1],desc_unigram[1:]))
+        desc_bigram = map(' '.join,zip(desc_unigram[:-1],desc_unigram[1:]))
         if not featureIndex:
-            for ngram in getWords(text,stemRequired=True) + desc_twogram:
+            for ngram in getWords(text,stemRequired=True) + desc_bigram:
                 ngram_count[ngram] += 1
         else:
+            # Unigrams over title+description+json
             for ngram in set(getWords(text,stemRequired=True)):
                 if ngram in featureIndex:
                     col.append(featureIndex[ngram])
@@ -137,6 +138,13 @@ def processData(fileName,featureIndex={}):
                 # Check for mixed Russian/English encoded words
                 if len(re.findall(ur'[a-z]',ngram)) and len(re.findall(ur'['+RUSSIAN_LOWER+ur']',ngram)): 
                     cnt_mixed_lang += 1
+            # Bigrams in description only
+            for ngram in set(desc_bigram):
+                if ngram in featureIndex:
+                    col.append(featureIndex[ngram])
+                    row.append(cur_row)
+                    val.append(text.count(ngram))
+
 
         if featureIndex:
             # Add new feature counting / analysis with these blocks:

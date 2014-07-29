@@ -33,7 +33,7 @@ def indicator(df,label,noncollinear=False):
     dummy = pd.get_dummies(df[label])
     if noncollinear:
         dummy = dummy.drop(dummy.columns[-1],axis=1)
-    return sparse.csc_matrix(dummy), dummy.labels
+    return sparse.csc_matrix(dummy), dummy.columns.values.decode('utf-8')
 
 def dummy_price_cross(df,label,price):
    # Return (sparse matrix of indicator - indicator*price data, labels for this data)
@@ -41,17 +41,15 @@ def dummy_price_cross(df,label,price):
    new_label = []
    #Add cross labels
    for dl in dummy_label:
-       new_label.append(dl+'*price')
+       new_label.append(dl+u'*price')
    #elementwise multiply price with indicator
-   sp_cross = sp_dummy.multiply(np.tile(price,shape(sp_dummy)[1]).T)
-   return sparse.hstack(sp_dummy,sp_cross), dummy_label+new_label
+   price_scalar = sparse.csc_matrix(np.tile(price,sp_dummy.shape[1]))
+   sp_cross = sp_dummy.multiply(price_scalar)
+   return sparse.hstack((sp_dummy,sp_cross)), dummy_label+new_label
 
 def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Jul27-15h27m/tfidf_nonzero/tfidf_nonzero.pkl'):
    print 'Loading features pickle...'
    featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
-   #------------------------
-   ipdb.set_trace()
-   #------------------------
    # For each dataset, append the price cross terms with category, subcategory
    print 'Converting sparse COO to CSC if needed...'
    for feat_mat,source_file in zip((trainFeatures.tocsc(),testFeatures.tocsc()),(train_file,test_file)):
@@ -59,13 +57,16 @@ def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Ju
        df = pd.read_csv(source_file, sep='\t', usecols=np.array([1,2]))
        for label in ('category','subcategory'):
            dpc_sp,dpc_label = dummy_price_cross(df, label, feat_mat[:,featureIndex['price']].toarray())
-           feat_mat = sparse.hstack(feat_mat,dpc_sp)
+           feat_mat = sparse.hstack((feat_mat,dpc_sp))
            end = len(featureIndex)
            for i,k in enumerate(dpc_label):
                featureIndex[k] = end+i
    out_pkl = os.path.splitext(feature_pkl)+'_xprice.pkl'
    joblib.dump((featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), out_pkl)
    print 'Writing feature names...'
+   #------------------------
+   ipdb.set_trace()
+   #------------------------
    write_featureIndex(featureIndex,os.path.splitext(feature_pkl)+'_featlist.tsv')
 
 if __name__=='__main__':

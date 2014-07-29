@@ -33,7 +33,7 @@ def indicator(df,label,noncollinear=False):
     dummy = pd.get_dummies(df[label])
     if noncollinear:
         dummy = dummy.drop(dummy.columns[-1],axis=1)
-    return sparse.csc_matrix(dummy), dummy.columns.values.decode('utf-8')
+    return sparse.csc_matrix(dummy), map(decode('utf-8'),dummy.columns.values.tolist())
 
 def dummy_price_cross(df,label,price):
    # Return (sparse matrix of indicator - indicator*price data, labels for this data)

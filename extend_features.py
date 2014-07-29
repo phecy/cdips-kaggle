@@ -46,15 +46,15 @@ def dummy_price_cross(df,label,price):
    sp_cross = sp_dummy.multiply(np.tile(price,shape(sp_dummy)[1]).T)
    return sparse.hstack(sp_dummy,sp_cross), dummy_label+new_label
 
-def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Jul27-15h27m/train_tfidf.pkl'):
+def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Jul27-15h27m/train_tfidf/train_tfidf.pkl'):
    print 'Loading features pickle...'
    featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
    #------------------------
    ipdb.set_trace()
    #------------------------
    print 'Loading categories data frames...'
-   df_test = pd.read_csv(test_file, sep='\t', usecols=np.array([1,2]))
-   for feat_mat,source_file in zip((trainFeatures,testFeatures),(train_file,test_file)):
+   # For each dataset, append the price cross terms with category, subcategory
+   for feat_mat,source_file in zip((trainFeatures.tocsc(),testFeatures.tocsc()),(train_file,test_file)):
        df = pd.read_csv(source_file, sep='\t', usecols=np.array([1,2]))
        for label in ('category','subcategory'):
            dpc_sp,dpc_label = dummy_price_cross(df, label, feat_mat[:,featureIndex['price']].toarray())

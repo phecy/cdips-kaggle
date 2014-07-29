@@ -31,35 +31,16 @@ import matplotlib.pyplot as plt
 
 # assume data file resides in script directory
 dataFolder = "C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kaggle\\"
-# Need to run nltk.download() to get the stopwords corpus (8KB or so).
-# Stop words are filtered out prior to NLP (e.g. prepositions)
-#   Note: не ~ no/not and this is coded NOT to be a stop word.
-        
 
 def main(run_name=time.strftime("%d_%H%M"), train_file="avito_train.tsv", test_file="avito_test.tsv"):
     """ Generates features and fits classifier. 
     Input command line argument is optional run name, defaults to date/time.
     """
-   ## This block is used to dump the feature pickle, called only once on a given train/test set. 
-   ## joblib replaces standard pickle load to work well with large data objects
-   ####
-   # featureIndexes are words/numbers in description/title linked to sequential numerical indices
-   # Note: Sampling 100 rows takes _much_ longer than using a 100-row input file
-    #featureIndexes = processData(dataFolder+train_file)
-    # Targets refers to ads with is_blocked
-   # trainFeatures is sparse matrix of [m-words x n-examples], Targets is [nx1] binary, ItemIds are ad index (for submission)
-   # only ~7.6 new words (not stems) per ad. Matrix is 96.4% zeros.
-    #trainFeatures,trainTargets,trainItemIds = processData(dataFolder+train_file, featureIndexes)
-   # Recall, we are predicting testTargets
-    #testFeatures,testItemIds = processData(dataFolder+test_file, featureIndexes)
-    #joblib.dump((trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), dataFolder+"train_data.pkl")
-   ####
     trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(dataFolder+"new-feat-full\\"+"train_data.pkl")
-    #logging.info("Feature preparation done, fitting model...")
     
     # Stochastic Gradient Descent training used (online learning)
     # loss (cost) = log ~ Logistic Regression
-    # L2 norm used for cost, alpha defines learning rate
+    # L2 norm used for cost, alpha defines REGULARIZATION **
     predicted_scores = []
     # SGD Logistic Regression per sample 
     clf = SGDClassifier(loss="log",penalty="l2",alpha=1e-4,class_weight="auto")

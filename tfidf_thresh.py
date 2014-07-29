@@ -59,8 +59,8 @@ def main(feature_pkl='Jul27-15h27m/train_data.pkl',threshold=None):
     # threshold the columns on TF-IDF sums
     tmp, reducedIndex, keep_idx = thresh_elim_cols(np.matrix(tfidf_sum),nzIndex,threshold)
     # Stack the reduced features to the non-gram columns
-    trainReduced = sparse.hstack((trainFeatures[:,keep_idx], trainFeatures[:,-len(NEW_FEATURE_LIST):]))
-    testReduced = sparse.hstack((testFeatures[:,keep_idx], testFeatures[:,-len(NEW_FEATURE_LIST):]))
+    for feat_mat in (trainFeatures,testFeatures):
+        feat_mat = sparse.hstack((feat_mat[:,keep_idx], feat_mat[:,-len(NEW_FEATURE_LIST):]),format='csc')
     # Add non-ngram feature labels
     end = len(reducedIndex)
     for i,label in enumerate(NEW_FEATURE_LIST):

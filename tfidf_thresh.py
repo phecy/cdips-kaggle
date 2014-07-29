@@ -31,11 +31,12 @@ def elim_exp_zeros(ngram_train):
 
 def thresh_elim_cols(mat,featureIndex,threshold=None):
     if threshold is None:
-        threshold = mat.min()
-    keep_idx = np.array(mat.sum(axis=0).tolist()[0]) >= threshold
-    features,indices = zip(*sorted(featureIndex.iteritems(), key=operator.itemgetter(1)))
-    nzIndex = dict((k,i) for i,k in enumerate(np.array(features)[keep_idx]))
-    return mat[:,keep_idx], nzIndex, keep_idx
+        return mat, featureIndex, np.zeros(mat.shape[1])==0
+    else:
+        keep_idx = np.array(mat.sum(axis=0).tolist()[0]) > threshold
+        features,indices = zip(*sorted(featureIndex.iteritems(), key=operator.itemgetter(1)))
+        nzIndex = dict((k,i) for i,k in enumerate(np.array(features)[keep_idx]))
+        return mat[:,keep_idx], nzIndex, keep_idx
    
 def main(feature_pkl='Jul27-15h27m/train_data.pkl',threshold=None):
     if threshold:

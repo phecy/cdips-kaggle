@@ -52,7 +52,9 @@ def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Ju
    featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
    # For each dataset, append the price cross terms with category, subcategory
    print 'Converting sparse COO to CSC if needed...'
-   for feat_mat,source_file in zip((trainFeatures.tocsc(),testFeatures.tocsc()),(train_file,test_file)):
+   trainFeatures = trainFeatures.tocsc()
+   testFeatures = testFeatures.tocsc()
+   for feat_mat,source_file in zip((trainFeatures,testFeatures),(train_file,test_file)):
        print 'Loading category data frame for {} ...'.format(source_file)
        df = pd.read_csv(source_file, sep='\t', usecols=np.array([1,2]))
        for label in ('category','subcategory'):
@@ -61,12 +63,12 @@ def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Ju
            end = len(featureIndex)
            for i,k in enumerate(dpc_label):
                featureIndex[k] = end+i
-   out_pkl = os.path.splitext(feature_pkl)+'_xprice.pkl'
-   joblib.dump((featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), out_pkl)
-   print 'Writing feature names...'
    #------------------------
    ipdb.set_trace()
    #------------------------
+   out_pkl = os.path.splitext(feature_pkl)+'_xprice.pkl'
+   joblib.dump((featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), out_pkl)
+   print 'Writing feature names...'
    write_featureIndex(featureIndex,os.path.splitext(feature_pkl)+'_featlist.tsv')
 
 if __name__=='__main__':

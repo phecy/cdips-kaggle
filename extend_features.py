@@ -49,16 +49,18 @@ def dummy_price_cross(df,label,price):
 
 def add_features(feat_mat,source_file,price_col):
    print 'Converting sparse COO to CSC if needed...'
-   feat_mat.tocsc()
+   feat_mat = feat_mat.tocsc()
    print 'Loading category data frame for {} ...'.format(source_file)
    df = pd.read_csv(source_file, sep='\t', usecols=np.array([1,2]))
+   accum_label = []
    for label in ('category','subcategory'):
        dpc_sp,dpc_label = dummy_price_cross(df, label, feat_mat[:,price_col].toarray())
        feat_mat = sparse.hstack((feat_mat,dpc_sp),format='csc')
+       accum_label += dpc_label
    #Add has_dummy_price feature - binary, not boolean
    has_price_mat = feat_mat[:,price_col]<=1
    feat_mat = sparse.hstack((feat_mat,sparse.csc_matrix(has_price_mat.astype('float64'))),format='csc')
-   return feat_mat, dpc_label
+   return feat_mat, accum_label
 
 def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Jul27-15h27m/tfidf_nonzero/tfidf_nonzero.pkl'):
    print 'Loading features pickle...'
@@ -66,12 +68,12 @@ def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Ju
 
    # For each dataset, append the price cross terms with category, subcategory
    price_col = featureIndex['price']
-   trainFeatures, tmp = add_features(trainFeatures,train_file,price_col)
-   testFeatures, dpc_label = add_features(testFeatures,test_file,price_col)
+   trainFeatures, accum_label = add_features(trainFeatures,train_file,price_col)
+   testFeatures, accum_label = add_features(testFeatures,test_file,price_col)
 
-   # Add feature names: should only execute once
+   # Add feature names for this category
    end = len(featureIndex)
-   for i,k in enumerate(dpc_label):
+   for i,k in enumerate(accum_label):
        featureIndex[k] = end+i
    featureIndex['has_dummy_price'] = len(featureIndex)+1
 

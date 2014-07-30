@@ -25,7 +25,7 @@ def write_featureIndex(featureIndex,out_filename):
     # Still tries to encode as ascii upon write
     with codecs.open(out_filename,'w','utf-8') as out_fid:
         for feature in sorted(featureIndex.iteritems(), key=operator.itemgetter(1)):
-            out_fid.write(feature[0]+u'\t'+unicode(z[1])+u'\n')
+            out_fid.write(feature[0]+u'\t'+unicode(feature[1])+u'\n')
 
 def indicator(df,label,noncollinear=False):
     # Make csr dummy variable from categorical label
@@ -58,7 +58,7 @@ def add_features(feat_mat,source_file,price_col):
        feat_mat = sparse.hstack((feat_mat,dpc_sp),format='csc')
        accum_label += dpc_label
    #Add has_dummy_price feature - binary, not boolean
-   has_price_mat = feat_mat[:,price_col]<=1
+   has_price_mat = feat_mat[:,price_col]<2
    feat_mat = sparse.hstack((feat_mat,sparse.csc_matrix(has_price_mat.astype('float64'))),format='csc')
    return feat_mat, accum_label
 
@@ -80,11 +80,8 @@ def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Ju
    print 'Dumping features pickle...'
    out_pkl = os.path.splitext(feature_pkl)[0]+'_xprice.pkl'
    joblib.dump((featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), out_pkl)
-   #------------------------
-   ipdb.set_trace()
-   #------------------------
    print 'Writing feature names...'
-   write_featureIndex(featureIndex,os.path.splitext(feature_pkl)+'_featlist.tsv')
+   write_featureIndex(featureIndex,os.path.splitext(feature_pkl)[0]+'_featlist.tsv')
 
 if __name__=='__main__':
     if len(sys.argv)>1:

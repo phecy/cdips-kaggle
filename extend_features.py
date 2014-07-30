@@ -81,7 +81,7 @@ def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Ju
    out_pkl = os.path.splitext(feature_pkl)[0]+'_xprice.pkl'
    joblib.dump((featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds), out_pkl)
    print 'Writing feature names...'
-   write_featureIndex(featureIndex,os.path.splitext(feature_pkl)[0]+'_featlist.tsv')
+   write_featureIndex(featureIndex,os.path.splitext(feature_pkl)[0]+'_xprice_featlist.tsv')
 
 if __name__=='__main__':
     if len(sys.argv)>1:

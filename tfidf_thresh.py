@@ -80,7 +80,7 @@ def main(feature_pkl='Jul27-15h27m/train_data.pkl',threshold=None):
     out_pkl = os.path.splitext(feature_pkl)[0]+'_tfidf.pkl'
     joblib.dump((reducedIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds),out_pkl)
     print 'Writing feature names...'
-    write_featureIndex(reducedIndex,os.path.splitext(feature_pkl)[0]+'_featlist_thresh.tsv')
+    write_featureIndex(reducedIndex,os.path.splitext(feature_pkl)[0]+'_tfidf_featlist.tsv')
 
 if __name__=='__main__':
     if len(sys.argv)>1:

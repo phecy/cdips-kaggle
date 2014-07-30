@@ -87,4 +87,4 @@ if __name__=='__main__':
     if len(sys.argv)>1:
         main(*sys.argv[1:])
     else:
-        main()
+	print 'USAGE: python extend_features.py [train_file] [test_file] [feature_pkl]'

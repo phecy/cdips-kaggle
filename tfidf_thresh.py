@@ -47,18 +47,16 @@ def calc_tfidf(feat_mat,featureIndex):
     ngram_mat = elim_exp_zeros(ngram_mat)
     print 'Ngrams, no explicit zeros',ngram_mat
     ngram_mat, nzIndex, tmp = thresh_elim_cols(ngram_mat,featureIndex,0)
-    print 'Ngrams, no uniform zero cols',ngram_mat
+    print 'Ngrams, no uniform zero cols',ngram_mat,len(nzIndex)
     # Calculate TF-IDF
     tfidf = DimReduction(ngram_mat,'tfidf')
-    tfidf_sum = np.array(tfidf.sum(axis=0).tolist()[0])
+    print 'TFIDF',tfidf
+    #tfidf_sum = np.array(tfidf.sum(axis=0).tolist()[0])
     #write_hist(tfidf_sum,'train_tfidf_hist.png')
-    # Remove uniformly zero columns after TF-IDF
-    ngram_mat, reducedIndex, tmp = thresh_elim_cols(ngram_mat,nzIndex,0)
-    print 'TFIDF, no uniform zero cols',ngram_mat
     # Stack the reduced features to the non-ngram columns
-    feat_mat = sparse.hstack((ngram_mat, feat_mat[:,-len(NEW_FEATURE_LIST):]),format='csc')
-    print 'TFIDF with new features',ngram_mat
-    return feat_mat, reducedIndex
+    feat_mat = sparse.hstack((tfidf, feat_mat[:,-len(NEW_FEATURE_LIST):]),format='csc')
+    print 'TFIDF with new features',feat_mat
+    return feat_mat, nzIndex
 
 def main(feature_pkl='Jul27-15h27m/train_data.pkl',threshold=None):
     if threshold is not None:
@@ -69,6 +67,10 @@ def main(feature_pkl='Jul27-15h27m/train_data.pkl',threshold=None):
     trainFeatures, reducedIndex = calc_tfidf(trainFeatures)
     print 'TEST:'
     testFeatures, tmp = calc_tfidf(testFeatures)
+    # Remove uniformly zero columns after TF-IDF train, keep only those cols in test
+    trainFeatures, reducedIndex, keep_idx = thresh_elim_cols(trainFeatures,reducedIndex,0)
+    testFeatures = testFeatures[:,keep_idx]
+    print 'TFIDF, no uniform zero cols',ngram_mat,len(reducedIndex)
     # Add non-ngram feature labels
     end = len(reducedIndex)
     for i,label in enumerate(NEW_FEATURE_LIST):

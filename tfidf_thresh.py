@@ -63,6 +63,9 @@ def main(feature_pkl='Jul27-15h27m/train_data.pkl',threshold=None):
         threshold = float(threshold)
     print 'Loading features pickle...'
     featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
+    #______________
+    ipdb.set_trace()
+    #``````````````
     print 'POOL TRAIN/TEST:'
     allFeatures = sparse.vstack((trainFeatures,testFeatures),format='csc')
     print trainFeatures.shape,testFeatures.shape,allFeatures.shape

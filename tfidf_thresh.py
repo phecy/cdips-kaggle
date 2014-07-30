@@ -1,4 +1,4 @@
-# coding : utf-8
+# coding: utf-8
 '''
 Threshold the ngram features run on tfidf score
 (eliminate unimportant features that make even sparse matrix unwieldy)
@@ -75,4 +75,4 @@ if __name__=='__main__':
     if len(sys.argv)>1:
         main(*sys.argv[1:])
     else:
-	print 'USAGE: python tfidf_thresh.py [feature_pkl] [threshold]' 
+	print 'USAGE: python tfidf_thresh.py <feature_pkl>'

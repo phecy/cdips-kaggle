@@ -75,4 +75,4 @@ if __name__=='__main__':
     if len(sys.argv)>1:
         main(*sys.argv[1:])
     else:
-        print 'USAGE: python tfidf_thresh.py <feature_pkl>'
+        print 'USAGE: python tfidf_thresh.py [feature_pkl] <threshold>'

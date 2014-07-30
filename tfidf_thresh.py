@@ -64,9 +64,9 @@ def main(feature_pkl='Jul27-15h27m/train_data.pkl',threshold=None):
     print 'Loading features pickle...'
     featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
     print 'TRAIN:'
-    trainFeatures, reducedIndex = calc_tfidf(trainFeatures)
+    trainFeatures, reducedIndex = calc_tfidf(trainFeatures,featureIndex)
     print 'TEST:'
-    testFeatures, tmp = calc_tfidf(testFeatures)
+    testFeatures, tmp = calc_tfidf(testFeatures,featureIndex)
     # Remove uniformly zero columns after TF-IDF train, keep only those cols in test
     trainFeatures, reducedIndex, keep_idx = thresh_elim_cols(trainFeatures,reducedIndex,0)
     testFeatures = testFeatures[:,keep_idx]

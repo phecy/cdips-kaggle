@@ -38,7 +38,7 @@ def thresh_elim_cols(mat,featureIndex,threshold=None):
         nzIndex = dict((k,i) for i,k in enumerate(np.array(features)[keep_idx]))
         return mat[:,keep_idx], nzIndex, keep_idx
 
-def calc_tfidf(feat_mat,featureIndex)
+def calc_tfidf(feat_mat,featureIndex):
     print 'Preparing features for TF-IDF...'
     # Exclude non-ngram features
     ngram_mat = feat_mat[:,:-len(NEW_FEATURE_LIST)]

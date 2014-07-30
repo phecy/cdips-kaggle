@@ -48,9 +48,6 @@ def main(feature_pkl='Jul27-15h27m/train_data.pkl',threshold=None):
     ngram_train = trainFeatures[:,:-len(NEW_FEATURE_LIST)]
     # Eliminate explicit zeros and uniformly zero columns
     ngram_train = elim_exp_zeros(ngram_train)
-    #_______________________________________
-    ipdb.set_trace()
-    #```````````````````````````````````````
     ngram_train, nzIndex, tmp = thresh_elim_cols(ngram_train,featureIndex,0)
     # Calculate TF-IDF
     tfidf = DimReduction(ngram_train,'tfidf')

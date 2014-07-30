@@ -1,6 +1,6 @@
 # coding : utf-8
 '''
-Threshold the neerray(tfidf_sum.tolist())gram features run on tfidf score
+Threshold the ngram features run on tfidf score
 (eliminate unimportant features that make even sparse matrix unwieldy)
 '''
 from dimred import DimReduction
@@ -75,4 +75,4 @@ if __name__=='__main__':
     if len(sys.argv)>1:
         main(*sys.argv[1:])
     else:
-        main()
+	print 'USAGE: python tfidf_thresh.py [feature_pkl] [threshold]' 

@@ -46,9 +46,9 @@ def calc_tfidf(feat_mat,featureIndex):
     # Eliminate explicit zeros and uniformly zero columns
     ngram_mat = elim_exp_zeros(ngram_mat)
     print 'Ngrams, no explicit zeros',ngram_mat.shape
-    ngram_mat, nzIndex, tmp = thresh_elim_cols(ngram_mat,featureIndex,0)
+    ngram_mat, nzIndex, tmp = thresh_elim_cols(ngram_mat,featureIndex,1)
     print 'Ngrams, no uniform zero cols',ngram_mat.shape,len(nzIndex)
-    # Calculate TF-IDF
+    # Calculate TF-IDF --getting off-by one column drop
     tfidf = DimReduction(ngram_mat,'tfidf')
     print 'TFIDF',tfidf.shape
     #tfidf_sum = np.array(tfidf.sum(axis=0).tolist()[0])

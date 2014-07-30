@@ -28,12 +28,10 @@ import matplotlib.pyplot as plt
 dataFolder = "C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kaggle\\"
 
 #Return the model estimator function
-def getmodelFunction():
-    # Stochastic Gradient Descent training used (online learning)
-    # loss (cost) = log ~ Logistic Regression
-    # L2 norm used for cost, alpha defines learning rate
-    # SGD Logistic Regression per sample 
-    clf = SGDClassifier(loss="log",penalty="l2",alpha=1e-4,class_weight="auto")
+def getmodelFunction(loss='log',penalty='l2',alpha=1e-4,class_weight='auto'):
+    alpha=float(alpha)
+    clf = SGDClassifier(loss,penalty,alpha,class_weight)
+    print clf
     return clf
     
 #Return the predicted class of the input test features
@@ -43,31 +41,37 @@ def model_predicted(model,fit_features,fit_targets,test_features):
 
 #Return the predicted probabilities of the input test features
 def model_predicted_prob(model,fit_features,fit_targets,test_features):
-    predicted_prob = model.fit(fit_features, fit_targets).predict_proba(test_features).T[1]
+    if model.loss=='log':
+        predicted_prob = model.fit(fit_features, fit_targets).predict_proba(test_features).T[1]
+    elif model.loss=='hinge':
+        # Note: for SVM these are not probabilities, but decision function as orthogonal distance from margin
+        predicted_prob = model.fit(fit_features, fit_targets).decision_function(test_features).T[1]
+    else:
+        print 'Unsupported model type'
+        return -1
     return predicted_prob
     
-def main(run_name=time.strftime("%d_%H%M"), train_file="avito_train.tsv", test_file="avito_test.tsv"):
-    """ Generates features and fits classifier. 
-    Input command line argument is optional run name, defaults to date/time.
+def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kaggle\\new-feat-full\\train_data.pkl', model_params=None, KFOLD=10):
+    """ K-fold cross-validation given model and training set.
+    Input path to pkl, model parameters as tuple, and number of folds
     """
+    # DEFAULT MODEL:
+    #    Stochastic Gradient Descent (online learning)
+    #    loss (cost) = log ~ Logistic Regression
+    #    L2 norm used for cost, alpha ~ Regularization
+    #    class_weight = auto
+    model = getmodelFunction(*model_params)
+
     #Load in the .pkl data needed for fitting/cross-validation
-    trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(dataFolder+"new-feat-full\\"+"train_data.pkl")
+    trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
     
     font = {'family' : 'normal',
         'weight' : 'bold',
         'size'   : 22}
     matplotlib.rc('font', **font)
     
-    model = getmodelFunction()
-    # Stochastic Gradient Descent training used (online learning)
-    # loss (cost) = log ~ Logistic Regression
-    # L2 norm used for cost, alpha defines REGULARIZATION **
-    predicted_scores = []
-    # L2 norm used for cost, alpha defines learning rate
-    # SGD Logistic Regression per sample 
-    
     #Cross validation split into 10 folds for cross-validation
-    kf_total = cross_validation.KFold(len(trainItemIds),n_folds=10,shuffle=True,indices=True)
+    kf_total = cross_validation.KFold(len(trainItemIds),n_folds=KFOLD,shuffle=True,indices=True)
     
     #conversion of targets to numpy 
     trainTargets_new = np.asarray(trainTargets)
@@ -100,9 +104,9 @@ def main(run_name=time.strftime("%d_%H%M"), train_file="avito_train.tsv", test_f
         count += 1
         
     #Calculate mean values and plot the results
-    mean_tpr /= 10
+    mean_tpr /= KFOLD
     mean_tpr[-1] = 1.0
-    total_conf /= 10
+    total_conf /= KFOLD
     
     #Plot the confusion matrix
     labels = ['not blocked','blocked']
@@ -148,6 +152,7 @@ if __name__=="__main__":
     if len(sys.argv)>1:
         main(*sys.argv[1:])
     else:
+        print 'USAGE: python cross_validation.py [feature.pkl] <model_params(loss,penalty,alpha,class_weight)> <KFOLD>'
         main()
     tend = time.time()
     print sys.argv[0]+"time H:M:S = "+str(datetime.timedelta(seconds=tend-tstart))

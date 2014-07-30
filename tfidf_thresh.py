@@ -37,34 +37,37 @@ def thresh_elim_cols(mat,featureIndex,threshold=None):
         features,indices = zip(*sorted(featureIndex.iteritems(), key=operator.itemgetter(1)))
         nzIndex = dict((k,i) for i,k in enumerate(np.array(features)[keep_idx]))
         return mat[:,keep_idx], nzIndex, keep_idx
-   
+
+def calc_tfidf(feat_mat,featureIndex)
+    print 'Preparing features for TF-IDF...'
+    # Exclude non-ngram features
+    ngram_mat = feat_mat[:,:-len(NEW_FEATURE_LIST)]
+    # Eliminate explicit zeros and uniformly zero columns
+    ngram_mat = elim_exp_zeros(ngram_mat)
+    ngram_mat, nzIndex, tmp = thresh_elim_cols(ngram_mat,featureIndex,0)
+    # Calculate TF-IDF
+    tfidf = DimReduction(ngram_mat,'tfidf')
+    tfidf_sum = np.array(tfidf.sum(axis=0).tolist()[0])
+    #write_hist(tfidf_sum,'train_tfidf_hist.png')
+    # threshold the columns on TF-IDF sums
+    tmp, reducedIndex, keep_idx = thresh_elim_cols(np.matrix(tfidf_sum),nzIndex,threshold)
+    # Stack the reduced features to the non-gram columns
+    return sparse.hstack((ngram_mat[:,keep_idx], feat_mat[:,-len(NEW_FEATURE_LIST):]),format='csc')
+
 def main(feature_pkl='Jul27-15h27m/train_data.pkl',threshold=None):
     if threshold is not None:
         threshold = float(threshold)
     print 'Loading features pickle...'
     featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
-    # Exclude non-ngram features
-    print 'Preparing features for TF-IDF...'
-    ngram_train = trainFeatures[:,:-len(NEW_FEATURE_LIST)]
-    # Eliminate explicit zeros and uniformly zero columns
-    ngram_train = elim_exp_zeros(ngram_train)
-    ngram_train, nzIndex, tmp = thresh_elim_cols(ngram_train,featureIndex,0)
-    # Calculate TF-IDF
-    tfidf = DimReduction(ngram_train,'tfidf')
-    tfidf_sum = np.array(tfidf.sum(axis=0).tolist()[0])
-    write_hist(tfidf_sum,'train_tfidf_hist.png')
-    # threshold the columns on TF-IDF sums
-    tmp, reducedIndex, keep_idx = thresh_elim_cols(np.matrix(tfidf_sum),nzIndex,threshold)
-    # Stack the reduced features to the non-gram columns
-    for feat_mat in (trainFeatures,testFeatures):
-        feat_mat = sparse.hstack((feat_mat[:,keep_idx], feat_mat[:,-len(NEW_FEATURE_LIST):]),format='csc')
+    trainFeatures = calc_tfidf(trainFeatures)
+    testFeatures = calc_tfidf(testFeatures)
     # Add non-ngram feature labels
     end = len(reducedIndex)
     for i,label in enumerate(NEW_FEATURE_LIST):
         reducedIndex[label]=end+int(i)
     # Write new output pkl
     out_pkl = os.path.splitext(feature_pkl)[0]+'_tfidf.pkl'
-    joblib.dump((reducedIndex, trainReduced, trainTargets, trainItemIds, testReduced, testItemIds),out_pkl)
+    joblib.dump((reducedIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds),out_pkl)
     print 'Writing feature names...'
     write_featureIndex(reducedIndex,os.path.splitext(feature_pkl)+'_featlist_thresh.tsv')
 
@@ -72,4 +75,4 @@ if __name__=='__main__':
     if len(sys.argv)>1:
         main(*sys.argv[1:])
     else:
-	print 'USAGE: python tfidf_thresh.py <feature_pkl>'
+        print 'USAGE: python tfidf_thresh.py <feature_pkl>'

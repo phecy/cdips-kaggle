@@ -39,9 +39,9 @@ def model_predicted(model,fit_features,fit_targets,test_features):
 #Return the predicted probabilities of the input test features
 def model_predicted_prob(model,fit_features,fit_targets,test_features):
     #Logistic Regression and RandomForest have predict_proba methods
-    if model.loss in ['log','rf']:
+    if type(model) is RandomForestClassifier or model.loss is 'log':
         predicted_prob = model.fit(fit_features, fit_targets).predict_proba(test_features).T[1]
-    elif model.loss=='hinge':
+    elif type(model) is SGDClassifier and model.loss is 'hinge':
         # Note: for SVM these are not probabilities, but decision function as orthogonal distance from margin
         predicted_prob = model.fit(fit_features, fit_targets).decision_function(test_features).T[1]
     else:
@@ -53,6 +53,7 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     """ K-fold cross-validation given model and training set.
     Input path to pkl, model parameters as tuple, and number of folds
     """
+    ipdb.set_trace()
     KFOLD = int(KFOLD)
     # DEFAULT MODEL:
     #    Stochastic Gradient Descent (online learning)
@@ -61,7 +62,7 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     #    class_weight = auto
 
     #Load in the .pkl data needed for fitting/cross-validation
-    trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
+    featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
     
     font = {'family' : 'normal',
         'weight' : 'bold',

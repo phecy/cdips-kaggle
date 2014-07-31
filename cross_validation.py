@@ -40,7 +40,7 @@ import matplotlib.pyplot as plt
 def model_predicted_prob(model_fit,test_features):
     #Logistic Regression and RandomForest have predict_proba methods
     if type(model_fit) is RandomForestClassifier or model_fit.loss is 'log':
-        return model_fit.predict_proba(test_features).T[1]
+        return model_fit.predict_log_proba(test_features).T[1]
     elif type(model_fit) is SGDClassifier and model_fit.loss is 'hinge':
         # Note: for SVM these are not probabilities, but decision function as orthogonal distance from margin
         return model_fit.decision_function(test_features).T[1]
@@ -97,8 +97,8 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
             norm_conf.append(tmp_arr)
         total_conf += norm_conf
         #Calculation of the ROC/AUC for each fold
-        predicted_scores_prob = model_predicted_prob(model_fit,trainTargets[test_indices])
-        fpr, tpr, thresholds = metrics.roc_curve(trainTargets[test_indices],predicted_scores_prob)
+        prob = model_predicted_prob(model_fit,trainFeatures[test_indices])
+        fpr, tpr, thresholds = metrics.roc_curve(trainTargets[test_indices],prob)
         mean_tpr += interp(mean_fpr, fpr, tpr)
         mean_tpr[0] = 0.0
         print "Finished with fold number " + str(count+1)

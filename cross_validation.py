@@ -63,7 +63,11 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
         featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = feature_pkl
     else:
         print 'Loading .pkl data for fitting/cross-validation...'
-        featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
+        if feature_pkl.find('new-feat-full'):
+            # Benchmark code did not save column names (featureIndex)
+            trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
+        else:
+            featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
     if type(model) is str:
         model = eval(model)
     KFOLD = int(KFOLD)

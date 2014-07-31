@@ -37,13 +37,13 @@ import matplotlib.pyplot as plt
 #    return predicted
 
 #Return the predicted probabilities of the input test features
-def model_predicted_prob(model_fit,test_features):
+def model_predicted_prob(model,test_features):
     #Logistic Regression and RandomForest have predict_proba methods
-    if type(model_fit) is RandomForestClassifier or model_fit.loss is 'log':
-        return model_fit.predict_proba(test_features).T[1]
-    elif type(model_fit) is SGDClassifier and model_fit.loss is 'hinge':
+    if type(model) is RandomForestClassifier or model.loss is 'log':
+        return model.predict_log_proba(test_features).T[1]
+    elif type(model) is SGDClassifier and model.loss is 'hinge':
         # Note: for SVM these are not probabilities, but decision function as orthogonal distance from margin
-        return model_fit.decision_function(test_features).T[1]
+        return model.decision_function(test_features).T[1]
     else:
         print 'Unsupported model type'
         return -1
@@ -71,6 +71,9 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
         'size'   : 22}
     matplotlib.rc('font', **font)
     
+    # convert features to CSR for row-slicing
+    trainFeatures = trainFeatures.tocsr()
+
     #Cross validation split into 10 folds for cross-validation
     kf_total = cross_validation.KFold(len(trainItemIds),n_folds=KFOLD,shuffle=True,indices=True)
     
@@ -84,8 +87,8 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     #Iterate through the folds of the dataset
     for train_indices, test_indices in kf_total:
         #Calculation of the confusion matrix values for each fold      
-        model_fit = model.fit(trainFeatures[train_indices], trainTargets[train_indices])
-        predicted = model_fit.predict(trainFeatures[test_indices])
+        model.fit(trainFeatures[train_indices], trainTargets[train_indices])
+        predicted = model.predict(trainFeatures[test_indices])
         conf_arr = metrics.confusion_matrix(trainTargets[test_indices],predicted)
         norm_conf = []        
         for i in conf_arr:
@@ -97,7 +100,7 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
             norm_conf.append(tmp_arr)
         total_conf += norm_conf
         #Calculation of the ROC/AUC for each fold
-        prob = model_predicted_prob(model_fit,trainFeatures[test_indices])
+        prob = model_predicted_prob(model,trainFeatures[test_indices])
         fpr, tpr, thresholds = metrics.roc_curve(trainTargets[test_indices],prob)
         mean_tpr += interp(mean_fpr, fpr, tpr)
         mean_tpr[0] = 0.0

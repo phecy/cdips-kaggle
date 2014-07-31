@@ -63,7 +63,7 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
         featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = feature_pkl
     else:
         print 'Loading .pkl data for fitting/cross-validation...'
-        if feature_pkl.find('new-feat-full'):
+        if feature_pkl.find('new-feat-full')>-1:
             # Benchmark code did not save column names (featureIndex)
             trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
         else:

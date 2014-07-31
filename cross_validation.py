@@ -37,17 +37,16 @@ def model_predicted(model,fit_features,fit_targets,test_features):
     return predicted
 
 #Return the predicted probabilities of the input test features
-def model_predicted_prob(model,fit_features,fit_targets,test_features):
+def model_predicted_prob(model_fit):
     #Logistic Regression and RandomForest have predict_proba methods
     if type(model) is RandomForestClassifier or model.loss is 'log':
-        predicted_prob = model.fit(fit_features, fit_targets).predict_proba(test_features).T[1]
+        return model_fit.predict_proba(test_features).T[1]
     elif type(model) is SGDClassifier and model.loss is 'hinge':
         # Note: for SVM these are not probabilities, but decision function as orthogonal distance from margin
-        predicted_prob = model.fit(fit_features, fit_targets).decision_function(test_features).T[1]
+        return model_fit.decision_function(test_features).T[1]
     else:
         print 'Unsupported model type'
         return -1
-    return predicted_prob
     
 def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kaggle\\new-feat-full\\train_data.pkl', model=SGDClassifier(loss='log',penalty='l2',alpha=1e-4,class_weight='auto'), KFOLD=10):
     """ K-fold cross-validation given model and training set.
@@ -61,7 +60,7 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     #    L2 norm used for cost, alpha ~ Regularization
     #    class_weight = auto
 
-    #Load in the .pkl data needed for fitting/cross-validation
+    print 'Loading .pkl data for fitting/cross-validation...'
     featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
     
     font = {'family' : 'normal',
@@ -73,7 +72,7 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     kf_total = cross_validation.KFold(len(trainItemIds),n_folds=KFOLD,shuffle=True,indices=True)
     
     #conversion of targets to numpy 
-    trainTargets_new = np.asarray(trainTargets)
+    trainTargets = np.asarray(trainTargets)
     count = 0
     total_conf=np.zeros(shape=(2,2))
     mean_tpr = 0
@@ -82,8 +81,9 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     #Iterate through the folds of the dataset
     for train_indices, test_indices in kf_total:
         #Calculation of the confusion matrix values for each fold      
-        predicted_values = model_predicted(model,trainFeatures[train_indices], trainTargets_new[train_indices],trainFeatures[test_indices])
-        conf_arr = metrics.confusion_matrix(trainTargets_new[test_indices],predicted_values)
+        model_fit = model.fit(trainFeatures[train_indices], trainTargets[train_indices])
+        predicted = model_fit.predict(trainFeatures[test_indices])
+        conf_arr = metrics.confusion_matrix(trainTargets[test_indices],predicted)
         norm_conf = []        
         for i in conf_arr:
             a = 0
@@ -95,8 +95,8 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
         total_conf += norm_conf
         
         #Calculation of the ROC/AUC for each fold
-        predicted_scores_prob = model_predicted_prob(model,trainFeatures[train_indices], trainTargets_new[train_indices],trainFeatures[test_indices])
-        fpr, tpr, thresholds = metrics.roc_curve(trainTargets_new[test_indices],predicted_scores_prob)
+        predicted_scores_prob = model_predicted_prob(model_fit)
+        fpr, tpr, thresholds = metrics.roc_curve(trainTargets[test_indices],predicted_scores_prob)
         mean_tpr += interp(mean_fpr, fpr, tpr)
         mean_tpr[0] = 0.0
         print "Finished with fold number " + str(count+1)

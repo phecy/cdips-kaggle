@@ -41,7 +41,7 @@ def main(feature_pkl='Jul29-14h40m/train_data.pkl',threshold=0):
     write_pkl(feature_pkl,'uni',(uniFeatureIndex, uniTrainFeatures, trainTargets, trainItemIds, uniTestFeatures, testItemIds))
     
     # Remove uniformly zero columns from all Ngrams
-    ngFeatures, ngFeatureIndex, tmp = thesh_elim_cols(allFeatures,featureIndex,threshold)
+    ngFeatures, ngFeatureIndex, tmp = thresh_elim_cols(allFeatures,featureIndex,threshold)
     print allFeatures.shape, 'After zero removal: ', ngFeatures.shape, len(ngFeatureIndex)
     ngFeatures = ngFeatures.tocsr()
     ngTrainFeatures = ngFeatures[:trainFeatures.shape[0],:].tocsc()

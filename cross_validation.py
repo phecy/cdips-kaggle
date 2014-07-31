@@ -39,9 +39,9 @@ import matplotlib.pyplot as plt
 #Return the predicted probabilities of the input test features
 def model_predicted_prob(model_fit):
     #Logistic Regression and RandomForest have predict_proba methods
-    if type(model) is RandomForestClassifier or model.loss is 'log':
+    if type(model_fit) is RandomForestClassifier or model.loss is 'log':
         return model_fit.predict_proba(test_features).T[1]
-    elif type(model) is SGDClassifier and model.loss is 'hinge':
+    elif type(model_fit) is SGDClassifier and model.loss is 'hinge':
         # Note: for SVM these are not probabilities, but decision function as orthogonal distance from margin
         return model_fit.decision_function(test_features).T[1]
     else:

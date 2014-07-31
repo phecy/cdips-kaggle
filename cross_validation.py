@@ -53,7 +53,6 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     """ K-fold cross-validation given model and training set.
     Input path to pkl, model parameters as tuple, and number of folds
     """
-    ipdb.pm()
     KFOLD = int(KFOLD)
     # DEFAULT MODEL:
     #    Stochastic Gradient Descent (online learning)

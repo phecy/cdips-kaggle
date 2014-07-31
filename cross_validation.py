@@ -132,6 +132,7 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     ax.set_yticklabels([''] + labels)
     plt.xlabel('Predicted')
     plt.ylabel('True')
+    plt.show()
     
     #Add confusion matrix values to the graph
     width = len(norm_conf)
@@ -151,6 +152,7 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
     plt.title('Receiver operating characteristic')
+    plt.show()
     
     auc_score = metrics.auc(mean_fpr,mean_tpr)
     print "AUC score\n" + str(auc_score)

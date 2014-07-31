@@ -52,7 +52,6 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     """ K-fold cross-validation given model and training set.
     Input path to pkl, model parameters as tuple, and number of folds
     """
-    KFOLD = int(KFOLD)
     # DEFAULT MODEL:
     #    Stochastic Gradient Descent (online learning)
     #    loss (cost) = log ~ Logistic Regression
@@ -65,6 +64,9 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     else:
         print 'Loading .pkl data for fitting/cross-validation...'
         featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
+    if type(model) is String:
+        model = eval(model)
+    KFOLD = int(KFOLD)
     
     font = {'family' : 'normal',
         'weight' : 'bold',
@@ -156,7 +158,7 @@ if __name__=="__main__":
     if len(sys.argv)>1:
         main(*sys.argv[1:])
     else:
-        print 'USAGE: python cross_validation.py [feature.pkl] <model_params(type,loss,penalty,alpha,class_weight)> <KFOLD>'
+        print 'USAGE: python cross_validation.py [feature.pkl] <model_params(loss,penalty,alpha,class_weight)> <KFOLD>'
         main()
     tend = time.time()
     print sys.argv[0]+"time H:M:S = "+str(datetime.timedelta(seconds=tend-tstart))

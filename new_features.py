@@ -130,11 +130,12 @@ def processData(fileName,featureIndex={}):
                 ngram_count[ngram] += 1
         else:
             # Unigrams over title+description+json
-            for ngram in set(getWords(text,stemRequired=True)):
+            textStems = getWords(text,stemRequired=True)
+            for ngram in set(textStems):
                 if ngram in featureIndex:
                     col.append(featureIndex[ngram])
                     row.append(cur_row)
-                    val.append(text.count(ngram))
+                    val.append(textStems.count(ngram))
                 # Check for mixed Russian/English encoded words
                 if len(re.findall(ur'[a-z]',ngram)) and len(re.findall(ur'['+RUSSIAN_LOWER+ur']',ngram)): 
                     cnt_mixed_lang += 1
@@ -143,8 +144,7 @@ def processData(fileName,featureIndex={}):
                 if ngram in featureIndex:
                     col.append(featureIndex[ngram])
                     row.append(cur_row)
-                    val.append(text.count(ngram))
-
+                    val.append(desc_bigram.count(ngram))
 
         if featureIndex:
             # Add new feature counting / analysis with these blocks:

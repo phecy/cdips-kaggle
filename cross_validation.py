@@ -16,13 +16,21 @@ import sys
 import matplotlib
 import matplotlib.pyplot as plt
 
-#Return the model estimator function
-def getmodelFunction(loss='log',penalty='l2',alpha=1e-4,class_weight='auto'):
-    alpha=float(alpha)
-    clf = SGDClassifier(loss,penalty,alpha,class_weight)
-    print clf
-    return clf
-    
+##Return the model estimator function
+#def getLinearModel(loss='log',penalty='l2',alpha=1e-4,class_weight='auto'):
+#    alpha=float(alpha)
+#    clf = SGDClassifier(loss=loss,penalty=penalty,alpha=alpha,class_weight=class_weight)
+#    print clf
+#    return clf
+#    
+#def getEnsembleModel(n_estimators=10,max_features='auto',max_depth=None,n_jobs=-1)
+#    n_estimators=int(n_estimators)
+#    if max_depth is not None:
+#        max_depth = int(max_depth)
+#    clf = RandomForestClassifier(n_estimators=n_estimators,max_features=max_features,max_depth=max_depth,n_jobs=n_jobs)
+#    print clf
+#    return clf
+
 #Return the predicted class of the input test features
 def model_predicted(model,fit_features,fit_targets,test_features):
     predicted = model.fit(fit_features, fit_targets).predict(test_features)
@@ -30,7 +38,8 @@ def model_predicted(model,fit_features,fit_targets,test_features):
 
 #Return the predicted probabilities of the input test features
 def model_predicted_prob(model,fit_features,fit_targets,test_features):
-    if model.loss=='log':
+    #Logistic Regression and RandomForest have predict_proba methods
+    if model.loss in ['log','rf']:
         predicted_prob = model.fit(fit_features, fit_targets).predict_proba(test_features).T[1]
     elif model.loss=='hinge':
         # Note: for SVM these are not probabilities, but decision function as orthogonal distance from margin
@@ -40,16 +49,16 @@ def model_predicted_prob(model,fit_features,fit_targets,test_features):
         return -1
     return predicted_prob
     
-def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kaggle\\new-feat-full\\train_data.pkl', model_params=None, KFOLD=10):
+def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kaggle\\new-feat-full\\train_data.pkl', model=SGDClassifier(loss='log',penalty='l2',alpha=1e-4,class_weight='auto'), KFOLD=10):
     """ K-fold cross-validation given model and training set.
     Input path to pkl, model parameters as tuple, and number of folds
     """
+    KFOLD = int(KFOLD)
     # DEFAULT MODEL:
     #    Stochastic Gradient Descent (online learning)
     #    loss (cost) = log ~ Logistic Regression
     #    L2 norm used for cost, alpha ~ Regularization
     #    class_weight = auto
-    model = getmodelFunction(*model_params)
 
     #Load in the .pkl data needed for fitting/cross-validation
     trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
@@ -134,14 +143,14 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     print "AUC score\n" + str(auc_score)
     
     logging.info("Done with cross-validation")
-    
+    return
                                
 if __name__=="__main__":            
     tstart = time.time()
     if len(sys.argv)>1:
         main(*sys.argv[1:])
     else:
-        print 'USAGE: python cross_validation.py [feature.pkl] <model_params(loss,penalty,alpha,class_weight)> <KFOLD>'
+        print 'USAGE: python cross_validation.py [feature.pkl] <model_params(type,loss,penalty,alpha,class_weight)> <KFOLD>'
         main()
     tend = time.time()
     print sys.argv[0]+"time H:M:S = "+str(datetime.timedelta(seconds=tend-tstart))

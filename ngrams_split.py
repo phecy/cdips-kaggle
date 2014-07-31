@@ -18,9 +18,8 @@ from tfidf_thresh import thresh_elim_cols
 def write_pkl(feature_pkl,suffix,feature_tuple):
     # Write new output pkl
     out_pkl = os.path.splitext(feature_pkl)[0]+'_'+suffix+'.pkl'
-    joblib.dump((reducedIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds),out_pkl)
-    print 'Writing feature names...'
-    write_featureIndex(reducedIndex,os.path.splitext(feature_pkl)[0]+'_'+suffix+'_featlist.tsv')
+    joblib.dump(feature_tuple,out_pkl)
+    write_featureIndex(feature_tuple[0],os.path.splitext(feature_pkl)[0]+'_'+suffix+'_featlist.tsv')
 
 def main(feature_pkl='Jul29-14h40m/train_data.pkl',threshold=0):
     if threshold is not None:

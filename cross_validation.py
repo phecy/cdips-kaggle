@@ -1,31 +1,20 @@
 # coding: utf-8
-import csv
-import re
-import nltk.corpus
-from collections import defaultdict
-import scipy.sparse as sp
 from scipy import interp
 import numpy as np
 import os
 from sklearn.linear_model import SGDClassifier
 from sklearn.ensemble import RandomForestClassifier
-from nltk import SnowballStemmer
-import random as rnd 
 import logging
 from sklearn.externals import joblib
 from sklearn import metrics
 from sklearn.utils import shuffle
 from sklearn import cross_validation
-import pdb
+import ipdb
 import datetime
 import time
-import pandas as pd
 import sys
 import matplotlib
 import matplotlib.pyplot as plt
-
-# assume data file resides in script directory
-dataFolder = "C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kaggle\\"
 
 #Return the model estimator function
 def getmodelFunction(loss='log',penalty='l2',alpha=1e-4,class_weight='auto'):

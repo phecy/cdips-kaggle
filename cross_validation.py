@@ -96,7 +96,6 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
                 tmp_arr.append(float(j)/float(a))
             norm_conf.append(tmp_arr)
         total_conf += norm_conf
-        
         #Calculation of the ROC/AUC for each fold
         predicted_scores_prob = model_predicted_prob(model_fit,trainTargets[test_indices])
         fpr, tpr, thresholds = metrics.roc_curve(trainTargets[test_indices],predicted_scores_prob)

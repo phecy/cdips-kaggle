@@ -63,7 +63,7 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
         featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = feature_pkl
     else:
         print 'Loading .pkl data for fitting/cross-validation...'
-        if feature_pkl.find('new-feat-full'):
+        if feature_pkl.find('new-feat-full')>-1:
             # Benchmark code did not save column names (featureIndex)
             trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
         else:
@@ -131,6 +131,7 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     ax.set_yticklabels([''] + labels)
     plt.xlabel('Predicted')
     plt.ylabel('True')
+    plt.show()
     
     #Add confusion matrix values to the graph
     width = len(norm_conf)
@@ -150,6 +151,7 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
     plt.title('Receiver operating characteristic')
+    plt.show()
     
     auc_score = metrics.auc(mean_fpr,mean_tpr)
     print "AUC score\n" + str(auc_score)

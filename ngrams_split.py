@@ -22,7 +22,7 @@ def write_pkl(feature_pkl,suffix,feature_tuple):
     print 'Writing feature names...'
     write_featureIndex(reducedIndex,os.path.splitext(feature_pkl)[0]+'_'+suffix+'_featlist.tsv')
 
-def main(feature_pkl='Jul29-14h40m/train_data.pkl',threshold=None):
+def main(feature_pkl='Jul29-14h40m/train_data.pkl',threshold=0):
     if threshold is not None:
         threshold = float(threshold)
     print 'Loading features pickle...'
@@ -42,7 +42,7 @@ def main(feature_pkl='Jul29-14h40m/train_data.pkl',threshold=None):
     write_pkl(feature_pkl,'uni',(uniFeatureIndex, uniTrainFeatures, TrainTargets, trainItemIds, uniTestFeatures, testItemIds))
     
     # Remove uniformly zero columns from all Ngrams
-    ngFeatures, ngFeatureIndex, tmp = thesh_elim_cols(allFeatures,featureIndex,0)
+    ngFeatures, ngFeatureIndex, tmp = thesh_elim_cols(allFeatures,featureIndex,threshold)
     print allFeatures.shape, 'After zero removal: ', ngFeatures.shape, len(ngFeatureIndex)
     ngFeatures = ngFeatures.tocsr()
     ngTrainFeatures = ngFeatures[:trainFeatures.shape[0],:].tocsc()

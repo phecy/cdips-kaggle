@@ -30,11 +30,11 @@ import matplotlib.pyplot as plt
 #    clf = RandomForestClassifier(n_estimators=n_estimators,max_features=max_features,max_depth=max_depth,n_jobs=n_jobs)
 #    print clf
 #    return clf
-
+#
 #Return the predicted class of the input test features
-def model_predicted(model,fit_features,fit_targets,test_features):
-    predicted = model.fit(fit_features, fit_targets).predict(test_features)
-    return predicted
+#def model_predicted(model,fit_features,fit_targets,test_features):
+#    predicted = model.fit(fit_features, fit_targets).predict(test_features)
+#    return predicted
 
 #Return the predicted probabilities of the input test features
 def model_predicted_prob(model_fit):
@@ -60,8 +60,12 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     #    L2 norm used for cost, alpha ~ Regularization
     #    class_weight = auto
 
-    print 'Loading .pkl data for fitting/cross-validation...'
-    featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
+    # Wrapper function may pre-load these large variables and pass as tuple instead of doing this step iteratively.
+    if type(feature_pkl) is tuple: 
+        featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = feature_pkl
+    else:
+        print 'Loading .pkl data for fitting/cross-validation...'
+        featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
     
     font = {'family' : 'normal',
         'weight' : 'bold',

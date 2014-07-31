@@ -64,7 +64,7 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     else:
         print 'Loading .pkl data for fitting/cross-validation...'
         featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
-    if type(model) is String:
+    if type(model) is str:
         model = eval(model)
     KFOLD = int(KFOLD)
     

@@ -75,7 +75,7 @@ def main(feature_pkl):
             'alpha':np.logspace(-6,3,num=10).tolist(),
             'penality':['l1','elasticnet','l2'],
             'n_iter':np.logspace(0,2,num=10).tolist(),
-            'class_weight':['auto']
+            'class_weight':['auto']}
     clf_sgd = GridSearchCV(
             estimator=SGDClassifier(),
             param_grid=logParams,
@@ -83,6 +83,7 @@ def main(feature_pkl):
             n_jobs=1,
             verbose=1,
             cv=10)
+            
     #Linear SVM
     #Random Forest
     #rfParams = {

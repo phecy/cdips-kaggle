@@ -22,6 +22,26 @@ import datetime
 import time
 import sys
 
+def print_result(clf)                       
+    print("Best parameters set found on development set:")
+    print()
+    print(clf.best_estimator_)
+    print()
+    print("Grid scores on development set:")
+    print()
+    for params, mean_score, scores in clf.grid_scores_:
+        print("%0.3f (+/-%0.03f) for %r"
+              % (mean_score, scores.std() / 2, params))
+    print()
+    print("Detailed classification report:")
+    print()
+    print("The model is trained on the full development set.")
+    print("The scores are computed on the full evaluation set.")
+    print()
+    y_true, y_pred = y_test, clf.predict(X_test)
+    print(metrics.classification_report(y_true, y_pred))
+    print()
+
 def main(feature_pkl):
 
     featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
@@ -42,22 +62,24 @@ def main(feature_pkl):
         #Logistic Regression
         #Linear SVM
         #Random Forest
-    clf = GridSearchCV(
-            estimator=, 
-            param_grid=, 
+    rfParams = {
+            'n_estimators':np.logspace(1,3,num=10).astype('int').tolist(),
+            'criterion':('gini','entropy'), 
+            'max_features'=('sqrt','log2'),
+            }
+    clf_rf = GridSearchCV(
+            estimator=RandomForestClassifier(), 
+            param_grid=rfParams, 
             scoring=metrics.average_precision_score,
-            loss_func=None,
-            score_func=None,
-            fit_params=None,
             n_jobs=-1,
-            iid=True,
-            refit=True,
             cv=10,
-            verbose=0,
             pre_dispatch='n_jobs')
         #Naive Bayes (Multinomial)
 
-                               
+    for clf in (clf_rf,):
+        clf.fit(trainSplit, testSplit)
+        print_result(clf) 
+
 if __name__=="__main__":            
     tstart = time.time()
     if len(sys.argv)>1:

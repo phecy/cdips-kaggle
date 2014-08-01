@@ -73,7 +73,8 @@ def main(feature_pkl):
 #Classifier
     #Logistic Regression and SVM with SGD
     logParams = {'loss':['hinge','log'],
-            'alpha':np.logspace(-6,3,num=10).tolist(),
+            #'alpha':np.logspace(-6,3,num=10).tolist(),
+            'alpha':[0,1e-10,1e-6,1e-2,100],
             'penalty':['l1','elasticnet','l2'],
             'n_iter':[5],
             'class_weight':['auto']}
@@ -81,7 +82,7 @@ def main(feature_pkl):
             estimator=SGDClassifier(),
             param_grid=logParams,
             scoring='roc_auc',
-            n_jobs=4,
+            n_jobs=5,
             verbose=10,
             cv=10)
     print clf_sgd

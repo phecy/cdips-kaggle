@@ -70,23 +70,34 @@ def main(feature_pkl):
     testSplit = sklearn.preprocessing.normalize(testSplit.tocsc(), norm='l2', axis=0)
     #z-score
 #Classifier
-    #Logistic Regression
+    #Logistic Regression and SVM with SGD
+    logParams = {'loss':['hinge','log'],
+            'alpha':np.logspace(-6,3,num=10).tolist(),
+            'penality':['l1','elasticnet','l2'],
+            'n_iter':np.logspace(0,2,num=10).tolist(),
+            'class_weight':['auto']
+    clf_sgd = GridSearchCV(
+            estimator=SGDClassifier(),
+            param_grid=logParams,
+            scoring=metrics.average_precision_score,
+            n_jobs=1,
+            cv=10)
     #Linear SVM
     #Random Forest
-    rfParams = {
-            'n_estimators':np.logspace(1,3,num=10).astype('int').tolist(),
-            'criterion':('gini','entropy'), 
-            'max_features':('sqrt','log2'),
-            }
-    clf_rf = GridSearchCV(
-            estimator=RandomForestClassifier(), 
-            param_grid=rfParams, 
-            scoring=metrics.average_precision_score,
-            n_jobs=-1,
-            cv=10)
-        #Naive Bayes (Multinomial)
+    #rfParams = {
+    #'n_estimators':np.logspace(1,3,num=10).astype('int').tolist(),
+    #        'criterion':('gini','entropy'), 
+    #        'max_features':('sqrt','log2'),
+    #        }
+    #clf_rf = GridSearchCV(
+    #        estimator=RandomForestClassifier(), 
+    #        param_grid=rfParams, 
+    #        scoring=metrics.average_precision_score,
+    #        n_jobs=-1,
+    #        cv=10)
+    #    #Naive Bayes (Multinomial)
 
-    for clf in (clf_rf,):
+    for clf in (clf_sgd,):
         clf.fit(trainSplit,np.asarray(trainSplitTargets))
 
     print_result(clf,testSplit,testSplitTargets) 

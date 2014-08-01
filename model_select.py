@@ -22,7 +22,7 @@ import datetime
 import time
 import sys
 
-def print_result(clf)                       
+def print_result(clf):
     print("Best parameters set found on development set:")
     print()
     print(clf.best_estimator_)

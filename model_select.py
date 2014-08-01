@@ -74,7 +74,7 @@ def main(feature_pkl):
     #Logistic Regression and SVM with SGD
     logParams = {'loss':['hinge','log'],
             'alpha':np.logspace(-6,3,num=10).tolist(),
-            'penality':['l1','elasticnet','l2'],
+            'penalty':['l1','elasticnet','l2'],
             'n_iter':np.logspace(0,2,num=10).tolist(),
             'class_weight':['auto']}
     clf_sgd = GridSearchCV(

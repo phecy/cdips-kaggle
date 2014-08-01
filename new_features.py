@@ -55,6 +55,7 @@ UPPER_CHAR = u'A-ZА-Я'
 NORMAL_CHAR = LOWER_CHAR+UPPER_CHAR+u'0-9?!.,()-/\s'
 PATTERN_NONLOWER = u'[^'+LOWER_CHAR+']'
 PATTERN_SPECIAL = u'[^'+NORMAL_CHAR+']'
+COUNT_MIN = 10
 
 logging.basicConfig(format = u'[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s', level = logging.NOTSET)
 
@@ -178,8 +179,9 @@ def processData(fileName,featureIndex={}):
     if not featureIndex:
         index = 0
         for ngram, count in ngram_count.iteritems():
-            featureIndex[ngram]=index
-            index += 1
+            if count>=COUNT_MIN:
+                featureIndex[ngram]=index
+                index += 1
         # Adding new feature indices beyond words
         for newFeature in NEW_FEATURE_LIST:
             featureIndex[newFeature]=index

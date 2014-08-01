@@ -16,26 +16,6 @@ import sys
 import matplotlib
 import matplotlib.pyplot as plt
 
-##Return the model estimator function
-#def getLinearModel(loss='log',penalty='l2',alpha=1e-4,class_weight='auto'):
-#    alpha=float(alpha)
-#    clf = SGDClassifier(loss=loss,penalty=penalty,alpha=alpha,class_weight=class_weight)
-#    print clf
-#    return clf
-#    
-#def getEnsembleModel(n_estimators=10,max_features='auto',max_depth=None,n_jobs=-1)
-#    n_estimators=int(n_estimators)
-#    if max_depth is not None:
-#        max_depth = int(max_depth)
-#    clf = RandomForestClassifier(n_estimators=n_estimators,max_features=max_features,max_depth=max_depth,n_jobs=n_jobs)
-#    print clf
-#    return clf
-#
-#Return the predicted class of the input test features
-#def model_predicted(model,fit_features,fit_targets,test_features):
-#    predicted = model.fit(fit_features, fit_targets).predict(test_features)
-#    return predicted
-
 #Return the predicted probabilities of the input test features
 def model_predicted_prob(model,test_features):
     #Logistic Regression and RandomForest have predict_proba methods
@@ -43,6 +23,7 @@ def model_predicted_prob(model,test_features):
         return model.predict_proba(test_features).T[1]
     elif type(model) is SGDClassifier and model.loss is 'hinge':
         # Note: for SVM these are not probabilities, but decision function as orthogonal distance from margin
+        ipdb.set_trace()
         return model.decision_function(test_features).T[1]
     else:
         print 'Unsupported model type'

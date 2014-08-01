@@ -43,6 +43,20 @@ def main(feature_pkl):
         #Linear SVM
         #Random Forest
         #Naive Bayes (Multinomial)
+    clf = GridSearchCV(
+            estimator, 
+            param_grid, 
+            scoring=metrics.average_precision_score,
+            loss_func=None,
+            score_func=None,
+            fit_params=None,
+            n_jobs=-1,
+            iid=True,
+            refit=True,
+            cv=10,
+            verbose=0,
+            pre_dispatch='n_jobs')
+
                                
 if __name__=="__main__":            
     tstart = time.time()

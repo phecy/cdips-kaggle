@@ -1,7 +1,7 @@
 # coding: utf-8
 
-import matplotlib
-matplotlib.use('Agg')
+#import matplotlib
+#matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -22,42 +22,70 @@ import datetime
 import time
 import sys
 
-def main(feature_pkl):
+def minmax(mat):
+    min_row = mat.min(axis=0)
+    max_row = mat.max(axis=0)
+    mat = mat - min_row.tile((mat.shape[0],1))
+    return mat.divide((max_row-min_row).tile((mat.shape[0],1)))
 
+def print_result(clf):
+    print("Best parameters set found on development set:")
+    print()
+    print(clf.best_estimator_)
+    print()
+    print("Grid scores on development set:")
+    print()
+    for params, mean_score, scores in clf.grid_scores_:
+        print("%0.3f (+/-%0.03f) for %r"
+              % (mean_score, scores.std() / 2, params))
+    print()
+    print("Detailed classification report:")
+    print()
+    print("The model is trained on the full development set.")
+    print("The scores are computed on the full evaluation set.")
+    print()
+    y_true, y_pred = y_test, clf.predict(X_test)
+    print(metrics.classification_report(y_true, y_pred))
+    print()
+
+def main(feature_pkl):
+    print 'Loading training set'
     featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
 
     #Set aside 20% of train for final model selection
-    trainSplit, testSplit = cross_validation.ShuffleSplit(trainFeatures.shape[0],n_iter=1,test_size=0.2)
+    trainSplit, testSplit = cross_validation.train_test_split(trainFeatures.tocsr(),test_size=0.2)
 
-    #Input
-        #frequencies
-        #TFIDF
-        #LSI/LDA
-    #Feature scaling
-        #MinMax
-        trainSplit = MinMaxScaler(trainSplit)
-        #unit vector
-        #z-score
-    #Classifier
-        #Logistic Regression
-        #Linear SVM
-        #Random Forest
-        #Naive Bayes (Multinomial)
-    clf = GridSearchCV(
-            estimator, 
-            param_grid, 
+#Input
+    #frequencies
+    #TFIDF
+    #LSI/LDA
+#Feature scaling
+    #MinMax
+    trainSplit = minmax(trainSplit)
+    testSplit = minmax(testSplit)
+    #unit vector
+    #z-score
+#Classifier
+    #Logistic Regression
+    #Linear SVM
+    #Random Forest
+    rfParams = {
+            'n_estimators':np.logspace(1,3,num=10).astype('int').tolist(),
+            'criterion':('gini','entropy'), 
+            'max_features':('sqrt','log2'),
+            }
+    clf_rf = GridSearchCV(
+            estimator=RandomForestClassifier(), 
+            param_grid=rfParams, 
             scoring=metrics.average_precision_score,
-            loss_func=None,
-            score_func=None,
-            fit_params=None,
             n_jobs=-1,
-            iid=True,
-            refit=True,
-            cv=10,
-            verbose=0,
-            pre_dispatch='n_jobs')
+            cv=10)
+        #Naive Bayes (Multinomial)
 
-                               
+    for clf in (clf_rf,):
+        clf.fit(trainSplit)
+        print_result(clf) 
+
 if __name__=="__main__":            
     tstart = time.time()
     if len(sys.argv)>1:

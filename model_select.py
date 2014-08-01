@@ -80,9 +80,9 @@ def main(feature_pkl):
     clf_sgd = GridSearchCV(
             estimator=SGDClassifier(),
             param_grid=logParams,
-            scoring='precision',
-            n_jobs=1,
-            verbose=1,
+            scoring='roc_auc',
+            n_jobs=10,
+            verbose=10,
             cv=10)
     print clf_sgd
             

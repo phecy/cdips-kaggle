@@ -1,7 +1,7 @@
 # coding: utf-8
 
-import matplotlib
-matplotlib.use('Agg')
+#import matplotlib
+#matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -21,6 +21,12 @@ import ipdb
 import datetime
 import time
 import sys
+
+def minmax(mat):
+    min_row = mat.min(axis=0)
+    max_row = mat.max(axis=0)
+    mat = mat - min_row.tile((mat.shape[0],1))
+    return mat.divide((max_row-min_row).tile((mat.shape[0],1)))
 
 def print_result(clf):
     print("Best parameters set found on development set:")
@@ -43,11 +49,11 @@ def print_result(clf):
     print()
 
 def main(feature_pkl):
-
+    print 'Loading training set'
     featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
 
     #Set aside 20% of train for final model selection
-    trainSplit, testSplit = cross_validation.train_test_split(trainFeatures,test_size=0.2)
+    trainSplit, testSplit = cross_validation.train_test_split(trainFeatures.tocsr(),test_size=0.2)
 
 #Input
     #frequencies
@@ -55,7 +61,8 @@ def main(feature_pkl):
     #LSI/LDA
 #Feature scaling
     #MinMax
-    trainSplit = MinMaxScaler(trainSplit)
+    trainSplit = minmax(trainSplit)
+    testSplit = minmax(testSplit)
     #unit vector
     #z-score
 #Classifier
@@ -72,12 +79,11 @@ def main(feature_pkl):
             param_grid=rfParams, 
             scoring=metrics.average_precision_score,
             n_jobs=-1,
-            cv=10,
-            pre_dispatch='n_jobs')
+            cv=10)
         #Naive Bayes (Multinomial)
 
     for clf in (clf_rf,):
-        clf.fit(trainSplit, testSplit)
+        clf.fit(trainSplit)
         print_result(clf) 
 
 if __name__=="__main__":            

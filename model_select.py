@@ -81,7 +81,7 @@ def main(feature_pkl):
             estimator=SGDClassifier(),
             param_grid=logParams,
             scoring='roc_auc',
-            n_jobs=10,
+            n_jobs=2,
             verbose=10,
             cv=10)
     print clf_sgd

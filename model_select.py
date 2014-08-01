@@ -65,7 +65,7 @@ def main(feature_pkl):
     rfParams = {
             'n_estimators':np.logspace(1,3,num=10).astype('int').tolist(),
             'criterion':('gini','entropy'), 
-            'max_features'=('sqrt','log2'),
+            'max_features':('sqrt','log2'),
             }
     clf_rf = GridSearchCV(
             estimator=RandomForestClassifier(), 

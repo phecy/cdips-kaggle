@@ -51,10 +51,10 @@ def print_result(clf,X_test,y_test):
     print()
 
 def main(feature_pkl):
-    print 'Loading training set'
+    print 'Loading training set...'
     featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
 
-    #Set aside 20% of train for final model selection
+    print 'Splitting training set for model selection...'
     trainSplit, testSplit, trainSplitTargets, testSplitTargets = cross_validation.train_test_split(trainFeatures, trainTargets, test_size=0.2)
 
 #Input
@@ -66,6 +66,7 @@ def main(feature_pkl):
     #trainSplit = minmax(trainSplit)
     #testSplit = minmax(testSplit)
     #unit vector
+    print 'Normalizing features (L2 unit vectors)...'
     trainSplit = sklearn.preprocessing.normalize(trainSplit.tocsc(), norm='l2', axis=0)
     testSplit = sklearn.preprocessing.normalize(testSplit.tocsc(), norm='l2', axis=0)
     #z-score
@@ -83,6 +84,7 @@ def main(feature_pkl):
             n_jobs=1,
             verbose=1,
             cv=10)
+    print clf_sgd
             
     #Linear SVM
     #Random Forest

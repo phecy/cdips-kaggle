@@ -23,8 +23,7 @@ def model_predicted_prob(model,test_features):
         return model.predict_proba(test_features).T[1]
     elif type(model) is SGDClassifier and model.loss is 'hinge':
         # Note: for SVM these are not probabilities, but decision function as orthogonal distance from margin
-        ipdb.set_trace()
-        return model.decision_function(test_features).T[1]
+        return model.decision_function(test_features)
     else:
         print 'Unsupported model type'
         return -1

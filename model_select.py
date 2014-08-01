@@ -81,6 +81,7 @@ def main(feature_pkl):
             param_grid=logParams,
             scoring=metrics.average_precision_score,
             n_jobs=1,
+            verbose=1,
             cv=10)
     #Linear SVM
     #Random Forest

@@ -49,19 +49,19 @@ def main(feature_pkl):
     #Set aside 20% of train for final model selection
     trainSplit, testSplit = cross_validation.train_test_split(trainFeatures,test_size=0.2)
 
-    #Input
-        #frequencies
-        #TFIDF
-        #LSI/LDA
-    #Feature scaling
-        #MinMax
-        trainSplit = MinMaxScaler(trainSplit)
-        #unit vector
-        #z-score
-    #Classifier
-        #Logistic Regression
-        #Linear SVM
-        #Random Forest
+#Input
+    #frequencies
+    #TFIDF
+    #LSI/LDA
+#Feature scaling
+    #MinMax
+    trainSplit = MinMaxScaler(trainSplit)
+    #unit vector
+    #z-score
+#Classifier
+    #Logistic Regression
+    #Linear SVM
+    #Random Forest
     rfParams = {
             'n_estimators':np.logspace(1,3,num=10).astype('int').tolist(),
             'criterion':('gini','entropy'), 

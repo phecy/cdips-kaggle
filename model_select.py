@@ -75,7 +75,7 @@ def main(feature_pkl):
     logParams = {'loss':['hinge','log'],
             'alpha':np.logspace(-6,3,num=10).tolist(),
             'penalty':['l1','elasticnet','l2'],
-            'n_iter':[5,50],
+            'n_iter':[5],
             'class_weight':['auto']}
     clf_sgd = GridSearchCV(
             estimator=SGDClassifier(),

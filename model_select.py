@@ -14,7 +14,7 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.externals import joblib
 from sklearn import metrics
-from sklearn.preprocessing import MinMaxScaler    
+import sklearn.preprocessing
 from sklearn.utils import shuffle
 from sklearn import cross_validation
 import ipdb
@@ -55,17 +55,19 @@ def main(feature_pkl):
     featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
 
     #Set aside 20% of train for final model selection
-    trainSplit, testSplit, trainSplitTargets, testSplitTargets = cross_validation.train_test_split(trainFeatures.tocsr(), trainTargets, test_size=0.2)
+    trainSplit, testSplit, trainSplitTargets, testSplitTargets = cross_validation.train_test_split(trainFeatures, trainTargets, test_size=0.2)
 
 #Input
     #frequencies
     #TFIDF
     #LSI/LDA
 #Feature scaling
-    #MinMax
-    trainSplit = minmax(trainSplit)
-    testSplit = minmax(testSplit)
+    # MinMax -- no sparse support, very slow by iteration
+    #trainSplit = minmax(trainSplit)
+    #testSplit = minmax(testSplit)
     #unit vector
+    trainSplit = sklearn.preprocessing.normalize(trainSplit.tocsc(), norm='l2', axis=0)
+    testSplit = sklearn.preprocessing.normalize(testSplit.tocsc(), norm='l2', axis=0)
     #z-score
 #Classifier
     #Logistic Regression

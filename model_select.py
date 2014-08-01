@@ -69,6 +69,7 @@ def main(feature_pkl):
     print 'Normalizing features (L2 unit vectors)...'
     trainSplit = sklearn.preprocessing.normalize(trainSplit.tocsc(), norm='l2', axis=0)
     testSplit = sklearn.preprocessing.normalize(testSplit.tocsc(), norm='l2', axis=0)
+    joblib.dump((trainSplit,testSplit),os.path.splitext(feature_pkl)[0]+'_splits.pkl')
     #z-score
 #Classifier
     #Logistic Regression and SVM with SGD

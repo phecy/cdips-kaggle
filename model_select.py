@@ -75,13 +75,13 @@ def main(feature_pkl):
     logParams = {'loss':['hinge','log'],
             'alpha':np.logspace(-6,3,num=10).tolist(),
             'penalty':['l1','elasticnet','l2'],
-            'n_iter':np.logspace(0,2,num=10).tolist(),
+            'n_iter':np.linspace(5,100,num=10).astype('int').tolist(),
             'class_weight':['auto']}
     clf_sgd = GridSearchCV(
             estimator=SGDClassifier(),
             param_grid=logParams,
             scoring='roc_auc',
-            n_jobs=2,
+            n_jobs=4,
             verbose=10,
             cv=10)
     print clf_sgd

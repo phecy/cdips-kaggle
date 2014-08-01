@@ -27,7 +27,7 @@ def main(feature_pkl):
     featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
 
     #Set aside 20% of train for final model selection
-    trainSplit, testSplit = cross_validation.ShuffleSplit(trainFeatures.shape[0],n_iter=1,test_size=0.2)
+    trainSplit, testSplit = cross_validation.train_test_split(trainFeatures,test_size=0.2)
 
     #Input
         #frequencies
@@ -42,10 +42,9 @@ def main(feature_pkl):
         #Logistic Regression
         #Linear SVM
         #Random Forest
-        #Naive Bayes (Multinomial)
     clf = GridSearchCV(
-            estimator, 
-            param_grid, 
+            estimator=, 
+            param_grid=, 
             scoring=metrics.average_precision_score,
             loss_func=None,
             score_func=None,
@@ -56,6 +55,7 @@ def main(feature_pkl):
             cv=10,
             verbose=0,
             pre_dispatch='n_jobs')
+        #Naive Bayes (Multinomial)
 
                                
 if __name__=="__main__":            

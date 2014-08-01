@@ -75,7 +75,7 @@ def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='Ju
    end = len(featureIndex)
    for i,k in enumerate(accum_label):
        featureIndex[k] = end+i
-   featureIndex['has_dummy_price'] = len(featureIndex)+1
+   featureIndex['has_dummy_price'] = len(featureIndex)
 
    print 'Dumping features pickle...'
    out_pkl = os.path.splitext(feature_pkl)[0]+'_xprice.pkl'

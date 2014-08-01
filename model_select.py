@@ -23,12 +23,14 @@ import time
 import sys
 
 def minmax(mat):
-    min_row = mat.min(axis=0)
-    max_row = mat.max(axis=0)
-    mat = mat - min_row.tile((mat.shape[0],1))
-    return mat.divide((max_row-min_row).tile((mat.shape[0],1)))
+    mat = mat.tocsc()
+    for i in range(mat.shape[1]):
+        col = mat[:,i]
+        col = (col - col.min()) / (col.max() - col.min())
+        mat[:,i] = col
+    return mat
 
-def print_result(clf):
+def print_result(clf,X_test,y_test):
     print("Best parameters set found on development set:")
     print()
     print(clf.best_estimator_)
@@ -53,7 +55,7 @@ def main(feature_pkl):
     featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
 
     #Set aside 20% of train for final model selection
-    trainSplit, testSplit = cross_validation.train_test_split(trainFeatures.tocsr(),test_size=0.2)
+    trainSplit, testSplit, trainSplitTargets, testSplitTargets = cross_validation.train_test_split(trainFeatures.tocsr(), trainTargets, test_size=0.2)
 
 #Input
     #frequencies
@@ -83,8 +85,9 @@ def main(feature_pkl):
         #Naive Bayes (Multinomial)
 
     for clf in (clf_rf,):
-        clf.fit(trainSplit)
-        print_result(clf) 
+        clf.fit(trainSplit,np.asarray(trainSplitTargets))
+
+    print_result(clf,testSplit,testSplitTargets) 
 
 if __name__=="__main__":            
     tstart = time.time()

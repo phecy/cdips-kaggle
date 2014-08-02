@@ -8,6 +8,7 @@ import numpy as np
 import os
 from sklearn.linear_model import SGDClassifier
 from sklearn.externals import joblib
+import sklearn
 import datetime
 import time
 import sys
@@ -15,6 +16,8 @@ import sys
 def main(feature_pkl):
     print 'Loading training data...'
     featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
+    trainFeatures = sklearn.preprocessing.normalize(trainFeatures.tocsc(), norm='l2', axis=0)
+    testFeatures = sklearn.preprocessing.normalize(testFeatures.tocsc(), norm='l2', axis=0)
     #trainSplit, testSplit = splitTuple
     # Best estimator from grid search:
     clf = SGDClassifier(alpha=1.87381742286e-07,
@@ -34,6 +37,7 @@ def main(feature_pkl):
             f.write('%d\n' % (item_id))
 
    # Turn estimator params into word clouds
+   #sorted(featureIndex.iteritems(), key=operator.itemgetter(1))
 
                                
 if __name__=="__main__":            

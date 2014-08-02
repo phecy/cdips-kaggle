@@ -17,7 +17,7 @@ def main(feature_pkl):
     featureIndex, splitTuple, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
     #trainSplit, testSplit = splitTuple
     # Best estimator from grid search:
-    SGDClassifier(alpha=1.87381742286e-07,
+    clf = SGDClassifier(alpha=1.87381742286e-07,
             class_weight='auto',
             loss='hinge',
             n_iter=10,
@@ -28,11 +28,13 @@ def main(feature_pkl):
 
    # Use probabilities instead of binary class prediction in order to generate a ranking    
     predicted_scores = clf.predict_proba(testFeatures).T[1]
-    
     with open(os.path.splitext(feature_pkl)[0]+'_testRanking.csv', 'w') as f:
         f.write('id\n')
         for pred_score, item_id in sorted(zip(predicted_scores, testItemIds), reverse = True):
             f.write('%d\n' % (item_id))
+
+   # Turn estimator params into word clouds
+
                                
 if __name__=="__main__":            
     tstart = time.time()

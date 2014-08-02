@@ -14,7 +14,7 @@ import sys
 
 def main(feature_pkl):
     print 'Loading training data...'
-    featureIndex, splitTuple, trainFeatures, trainTargets, trainItemIds = joblib.load(feature_pkl)
+    featureIndex, splitTuple, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
     #trainSplit, testSplit = splitTuple
     # Best estimator from grid search:
     SGDClassifier(alpha=1.87381742286e-07,

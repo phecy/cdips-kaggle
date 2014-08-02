@@ -43,8 +43,9 @@ def main(feature_pkl):
             f.write('%d\n' % (item_id))
 
    # Turn estimator params into word clouds
-   features, indices = sorted(featureIndex.iteritems(), key=operator.itemgetter(1))
-   coef_sort = sorted(clf.coef_[0],indices)
+   features, indices = zip(*sorted(featureIndex.iteritems(), key=operator.itemgetter(1)))
+   coef_tuple = zip(clf.coef_[0],indices)
+   coef_sort = sorted(coef_tuple, reverse=True)
    print 'Top 20 for illicit:'
    worldle_print(coef_sort[:20],features)
    print 'Top 20 for licit:'

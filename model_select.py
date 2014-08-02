@@ -73,12 +73,12 @@ def main(feature_pkl):
     #z-score
 #Classifier
     #Logistic Regression and SVM with SGD
-    logParams = {'loss':['hinge'],
+    newer_logParams = {'loss':['hinge'],
             'alpha':np.logspace(-9,-4,num=12).tolist(),
             'penalty':['l2'],
             'n_iter':[10],
             'class_weight':['auto']}
-    old_logParams = {'loss':['hinge','log'],
+    logParams = {'loss':['hinge','log'],
             'alpha':[1e-14,1e-10,1e-6,1e-2,100],
             'penalty':['l1','elasticnet','l2'],
             'n_iter':[5],
@@ -86,7 +86,8 @@ def main(feature_pkl):
     clf_sgd = GridSearchCV(
             estimator=SGDClassifier(),
             param_grid=logParams,
-            scoring='roc_auc',
+            #scoring='roc_auc',
+            scoring='precision',
             n_jobs=5,
             verbose=10,
             cv=10)

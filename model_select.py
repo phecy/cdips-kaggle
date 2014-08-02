@@ -89,7 +89,7 @@ def main(feature_pkl):
             #scoring='roc_auc',
             #scoring='precision',
             scoring='average_precision',
-            n_jobs=10,
+            n_jobs=5,
             verbose=10,
             cv=10)
     print clf_sgd

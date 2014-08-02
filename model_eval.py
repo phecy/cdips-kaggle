@@ -31,14 +31,13 @@ def main(feature_pkl):
            loss='hinge',
            n_iter=10,
            penalty='l2')
+    clf = SGDClassifier(alpha=3.16227766017e-08, class_weight='auto', epsilon=0.1,
+       eta0=0.0, fit_intercept=True, l1_ratio=0.15,
+       learning_rate='optimal', loss='log', n_iter=5, n_jobs=1,
+       penalty='elasticnet', power_t=0.5, random_state=None, shuffle=False,
+       verbose=0, warm_start=False)
 
-    clf = SGDClassifier(alpha=8.1113083079e-05, class_weight='auto', epsilon=0.1,
-      eta0=0.0, fit_intercept=True, l1_ratio=0.15,
-      learning_rate='optimal', loss='hinge', n_iter=10, n_jobs=1,
-      penalty='l2', power_t=0.5, random_state=None, shuffle=False,
-      verbose=0, warm_start=False)
-
-    print 'Fitting model '
+    print 'Fitting model...'
     clf.fit(trainFeatures,trainTargets)
 
     # Use probabilities or decision function to generate a ranking    
@@ -53,9 +52,9 @@ def main(feature_pkl):
     coef_tuple = zip(clf.coef_[0],indices)
     coef_sort = sorted(coef_tuple, reverse=True)
     print 'Top 20 for illicit:'
-    worldle_print(coef_sort[:20],features)
+    wordle_print(coef_sort[:20],features)
     print 'Top 20 for licit:'
-    worldle_print(coef_sort[-20:],features)
+    wordle_print(coef_sort[-20:],features)
 
                                
 if __name__=="__main__":            

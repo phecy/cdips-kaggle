@@ -34,7 +34,7 @@ def write_result(clf,X_test,y_test,feature_pkl):
     with open(os.path.splitext(feature_pkl)[0]+'_best.txt', 'w') as f:
         f.write("Best parameters set found on development set:")
         f.write('\n')
-        f.write(clf.best_estimator_)
+        f.write(str(clf.best_estimator_))
         f.write('\n')
         f.write("Grid scores on development set:")
         f.write('\n')
@@ -46,7 +46,7 @@ def write_result(clf,X_test,y_test,feature_pkl):
         f.write("The scores are computed on the full evaluation set.")
         f.write('\n')
         y_true, y_pred = y_test, clf.predict(X_test)
-        f.write(metrics.classification_report(y_true, y_pred))
+        f.write(str(metrics.classification_report(y_true, y_pred)))
 
 def main(feature_pkl):
     print 'Loading training set...'
@@ -79,7 +79,7 @@ def main(feature_pkl):
             'n_iter':[10],
             'class_weight':['auto']}
     logParams = {'loss':['hinge','log'],
-            'alpha':[1e-14,1e-10,1e-6,1e-2,100],
+            'alpha':np.logspace(-9,-4,num=12).tolist(),
             'penalty':['l1','elasticnet','l2'],
             'n_iter':[5],
             'class_weight':['auto']}

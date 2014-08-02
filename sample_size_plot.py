@@ -50,7 +50,7 @@ def main(run_name=time.strftime("%d_%H%M"), train_file="avito_train.tsv", test_f
     Input command line argument is optional run name, defaults to date/time.
     """
     #Load in the .pkl data needed for fitting/cross-validation
-    featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(dataFolder+"\\git_folder\\new-feat-full\\"+"train_data_tfidf_xprice.pkl")
+    featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load("/home/temp/cdips-kaggle/Aug01-00h27m/train_data_tfidf_xprice.pkl")
     
     font = {'family' : 'normal',
         'weight' : 'bold',
@@ -65,11 +65,11 @@ def main(run_name=time.strftime("%d_%H%M"), train_file="avito_train.tsv", test_f
     trainSplit, testSplit, trainSplitTargets, testSplitTargets = cross_validation.train_test_split(trainFeatures, trainTargets, test_size=0.2,random_state=0)
     trainSplit = sklearn.preprocessing.normalize(trainSplit.tocsc(), norm='l2', axis=0)
     testSplit = sklearn.preprocessing.normalize(testSplit.tocsc(), norm='l2', axis=0)
-    for x in frange(0.01, 0.2, 0.01):
-        trainSplitnew = trainSplit[0:len(trainSplit)*x]
-        testSplitnew = testSplit[0:len(trainSplit)*x]
-        trainTargetsnew = trainSplitTargets[0:len(trainSplit)*x]
-        testTargetsnew = testSplitTargets[0:len(trainSplit)*x]
+    for x in frange(0.005, 0.2, 0.005):
+        trainSplitnew = trainSplit[0:trainSplit.shape[0]*x]
+        testSplitnew = testSplit[0:trainSplit.shape[0]*x]
+        trainTargetsnew = trainSplitTargets[0:trainSplit.shape[0]*x]
+        testTargetsnew = testSplitTargets[0:trainSplit.shape[0]*x]
         print("Before fitting:")
         print("x = " + str(x))
         print()
@@ -84,7 +84,7 @@ def main(run_name=time.strftime("%d_%H%M"), train_file="avito_train.tsv", test_f
         print()
 
     logging.info("Done with grid_search")
-    joblib.dump((train_errors,test_errors), dataFolder+"\\git_folder\\new-feat-full\\"+"errors_results.pkl")
+    joblib.dump((train_errors,test_errors),"/home/temp/cdips-kaggle/errors_results.pkl")
 
                                
 if __name__=="__main__":            

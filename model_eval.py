@@ -27,10 +27,16 @@ def main(feature_pkl):
     #trainSplit, testSplit = splitTuple
     # Best estimator from grid search:
     clf = SGDClassifier(alpha=1.87381742286e-07,
-            class_weight='auto',
-            loss='hinge',
-            n_iter=10,
-            penalty='l2')
+           class_weight='auto',
+           loss='hinge',
+           n_iter=10,
+           penalty='l2')
+
+    clf = SGDClassifier(alpha=8.1113083079e-05, class_weight='auto', epsilon=0.1,
+      eta0=0.0, fit_intercept=True, l1_ratio=0.15,
+      learning_rate='optimal', loss='hinge', n_iter=10, n_jobs=1,
+      penalty='l2', power_t=0.5, random_state=None, shuffle=False,
+      verbose=0, warm_start=False)
 
     print 'Fitting model '
     clf.fit(trainFeatures,trainTargets)
@@ -43,13 +49,13 @@ def main(feature_pkl):
             f.write('%d\n' % (item_id))
 
    # Turn estimator params into word clouds
-   features, indices = zip(*sorted(featureIndex.iteritems(), key=operator.itemgetter(1)))
-   coef_tuple = zip(clf.coef_[0],indices)
-   coef_sort = sorted(coef_tuple, reverse=True)
-   print 'Top 20 for illicit:'
-   worldle_print(coef_sort[:20],features)
-   print 'Top 20 for licit:'
-   worldle_print(coef_sort[-20:],features)
+    features, indices = zip(*sorted(featureIndex.iteritems(), key=operator.itemgetter(1)))
+    coef_tuple = zip(clf.coef_[0],indices)
+    coef_sort = sorted(coef_tuple, reverse=True)
+    print 'Top 20 for illicit:'
+    worldle_print(coef_sort[:20],features)
+    print 'Top 20 for licit:'
+    worldle_print(coef_sort[-20:],features)
 
                                
 if __name__=="__main__":            

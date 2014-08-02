@@ -39,7 +39,7 @@ def write_result(clf,X_test,y_test,feature_pkl):
         f.write("Grid scores on development set:")
         f.write('\n')
         for params, mean_score, scores in clf.grid_scores_:
-            f.write("%0.3f (+/-%0.03f) for %r" % (mean_score, scores.std() / 2, params))
+            f.write("%0.3f (+/-%0.03f) for %r \n" % (mean_score, scores.std() / 2, params))
         f.write('\n')
         f.write("Detailed classification report:")
         f.write("The model is trained on the full development set.")
@@ -78,8 +78,8 @@ def main(feature_pkl):
             'penalty':['l2'],
             'n_iter':[10],
             'class_weight':['auto']}
-    logParams = {'loss':['hinge','log'],
-            'alpha':np.logspace(-9,-4,num=12).tolist(),
+    logParams = {'loss':['log','hinge'],
+            'alpha':np.logspace(-9,-2,num=15).tolist(),
             'penalty':['l1','elasticnet','l2'],
             'n_iter':[5],
             'class_weight':['auto']}
@@ -87,8 +87,9 @@ def main(feature_pkl):
             estimator=SGDClassifier(),
             param_grid=logParams,
             #scoring='roc_auc',
-            scoring='precision',
-            n_jobs=5,
+            #scoring='precision',
+            scoring='average_precision',
+            n_jobs=10,
             verbose=10,
             cv=10)
     print clf_sgd

@@ -37,7 +37,7 @@ def main(feature_pkl):
 if __name__=="__main__":            
     tstart = time.time()
     if len(sys.argv)>1:
-        main(sys.argv[1:])
+        main(*sys.argv[1:])
     else:
         print 'USAGE: python model_eval.py [feature.pkl]'
     tend = time.time()

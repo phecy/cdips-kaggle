@@ -75,7 +75,7 @@ def main(feature_pkl):
     #Logistic Regression and SVM with SGD
     logParams = {'loss':['hinge','log'],
             #'alpha':np.logspace(-6,3,num=10).tolist(),
-            'alpha':[1e-6,0,1e-10,1e-2,100],
+            'alpha':[1e-14,1e-10,1e-6,1e-2,100],
             'penalty':['l1','elasticnet','l2'],
             'n_iter':[5],
             'class_weight':['auto']}

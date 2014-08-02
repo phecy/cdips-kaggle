@@ -61,6 +61,7 @@ def main(run_name=time.strftime("%d_%H%M"), train_file="avito_train.tsv", test_f
     
     train_errors = []
     test_errors = []
+    num_points = []
     
     trainSplit, testSplit, trainSplitTargets, testSplitTargets = cross_validation.train_test_split(trainFeatures, trainTargets, test_size=0.2,random_state=0)
     trainSplit = sklearn.preprocessing.normalize(trainSplit.tocsc(), norm='l2', axis=0)
@@ -73,18 +74,20 @@ def main(run_name=time.strftime("%d_%H%M"), train_file="avito_train.tsv", test_f
         print("Before fitting:")
         print("x = " + str(x))
         print()
-        clf = SGDClassifier(loss="log", 
-                            penalty="l2", 
-                            alpha=1e-8, 
-                            class_weight="auto")
+        clf = SGDClassifier(alpha=3.16227766017e-08, class_weight='auto', epsilon=0.1,
+                            eta0=0.0, fit_intercept=True, l1_ratio=0.15,
+                            learning_rate='optimal', loss='log', n_iter=5, n_jobs=1,
+                            penalty='elasticnet', power_t=0.5, random_state=None, shuffle=False,
+                            verbose=0, warm_start=False)
         clf.fit(trainSplitnew,np.asarray(trainTargetsnew))
         train_errors.append(clf.score(trainSplitnew, trainTargetsnew))
         test_errors.append(clf.score(testSplitnew, testTargetsnew))
+        num_points.append(trainSplit.shape[0]*x)
         print("Fitting done, moving to next")
         print()
 
     logging.info("Done with grid_search")
-    joblib.dump((train_errors,test_errors),"/home/temp/cdips-kaggle/errors_results.pkl")
+    joblib.dump((train_errors,test_errors,num_points),"/home/temp/cdips-kaggle/errors_results.pkl")
 
                                
 if __name__=="__main__":            

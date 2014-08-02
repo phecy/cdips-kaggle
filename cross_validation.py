@@ -14,6 +14,7 @@ import datetime
 import time
 import sys
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 #Return the predicted probabilities of the input test features
@@ -112,6 +113,8 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     plt.xlabel('Predicted')
     plt.ylabel('True')
     plt.savefig(os.path.splitext(feature_pkl)[0]+'_confusion.png')
+    plt.savefig(os.path.splitext(feature_pkl)[0]+'_confusion.pdf')
+    plt.savefig(os.path.splitext(feature_pkl)[0]+'_confusion.jpg')
     
     #Add confusion matrix values to the graph
     width = len(norm_conf)
@@ -132,6 +135,8 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     plt.ylabel('True Positive Rate')
     plt.title('Receiver operating characteristic')
     plt.savefig(os.path.splitext(feature_pkl)[0]+'_roc.png')
+    plt.savefig(os.path.splitext(feature_pkl)[0]+'_roc.pdf')
+    plt.savefig(os.path.splitext(feature_pkl)[0]+'_roc.jpg')
     
     auc_score = metrics.auc(mean_fpr,mean_tpr)
     print "AUC score\n" + str(auc_score)

@@ -26,8 +26,8 @@ def main(feature_pkl):
     print 'Fitting model '
     clf.fit(trainFeatures,trainTargets)
 
-   # Use probabilities instead of binary class prediction in order to generate a ranking    
-    predicted_scores = clf.predict_proba(testFeatures).T[1]
+   # Use probabilities or decision function to generate a ranking    
+    predicted_scores = clf.decision_function(testFeatures)
     with open(os.path.splitext(feature_pkl)[0]+'_testRanking.csv', 'w') as f:
         f.write('id\n')
         for pred_score, item_id in sorted(zip(predicted_scores, testItemIds), reverse = True):

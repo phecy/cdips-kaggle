@@ -53,7 +53,7 @@ def main(feature_pkl):
     featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
 
     print 'Splitting training set for model selection...'
-    trainSplit, testSplit, trainSplitTargets, testSplitTargets = cross_validation.train_test_split(trainFeatures, trainTargets, test_size=0.2)
+    trainSplit, testSplit, trainSplitTargets, testSplitTargets = cross_validation.train_test_split(trainFeatures, trainTargets, test_size=0.2, random_state=0)
 
 #Input
     #frequencies
@@ -73,8 +73,12 @@ def main(feature_pkl):
     #z-score
 #Classifier
     #Logistic Regression and SVM with SGD
-    logParams = {'loss':['hinge','log'],
-            #'alpha':np.logspace(-6,3,num=10).tolist(),
+    logParams = {'loss':['hinge'],
+            'alpha':np.logspace(-9,-4,num=12).tolist(),
+            'penalty':['l2'],
+            'n_iter':[10],
+            'class_weight':['auto']}
+    old_logParams = {'loss':['hinge','log'],
             'alpha':[1e-14,1e-10,1e-6,1e-2,100],
             'penalty':['l1','elasticnet','l2'],
             'n_iter':[5],
@@ -107,7 +111,7 @@ def main(feature_pkl):
         clf.fit(trainSplit,np.asarray(trainSplitTargets))
 
     print(clf.best_estimator_)
-    write_result(clf,testSplit,testSplitTargets) 
+    write_result(clf,testSplit,testSplitTargets,feature_pkl) 
 
 if __name__=="__main__":            
     tstart = time.time()

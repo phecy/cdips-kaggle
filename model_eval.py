@@ -5,6 +5,7 @@ Evaluate best fit model to sort avito test data.
 import csv
 import re
 import numpy as np
+import operator
 import os
 from sklearn.linear_model import SGDClassifier
 from sklearn.externals import joblib
@@ -13,9 +14,14 @@ import datetime
 import time
 import sys
 
+def wordle_print(coef_rank,features):
+    for coef, index in coef_rank:
+        print features[index].decode('utf-8')+':'+str(coef)+'\n'
+
 def main(feature_pkl):
-    print 'Loading training data...'
+    print 'Loading data...'
     featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
+    print 'Normalizing data...'
     trainFeatures = sklearn.preprocessing.normalize(trainFeatures.tocsc(), norm='l2', axis=0)
     testFeatures = sklearn.preprocessing.normalize(testFeatures.tocsc(), norm='l2', axis=0)
     #trainSplit, testSplit = splitTuple
@@ -29,7 +35,7 @@ def main(feature_pkl):
     print 'Fitting model '
     clf.fit(trainFeatures,trainTargets)
 
-   # Use probabilities or decision function to generate a ranking    
+    # Use probabilities or decision function to generate a ranking    
     predicted_scores = clf.decision_function(testFeatures)
     with open(os.path.splitext(feature_pkl)[0]+'_testRanking.csv', 'w') as f:
         f.write('id\n')
@@ -37,7 +43,12 @@ def main(feature_pkl):
             f.write('%d\n' % (item_id))
 
    # Turn estimator params into word clouds
-   #sorted(featureIndex.iteritems(), key=operator.itemgetter(1))
+   features, indices = sorted(featureIndex.iteritems(), key=operator.itemgetter(1))
+   coef_sort = sorted(clf.coef_[0],indices)
+   print 'Top 20 for illicit:'
+   worldle_print(coef_sort[:20],features)
+   print 'Top 20 for licit:'
+   worldle_print(coef_sort[-20:],features)
 
                                
 if __name__=="__main__":            

@@ -39,11 +39,11 @@ def classify(dummy_train,dummy_test,feature_pkl,output_file):
         # Get nonzero dummy indices as array
         idx_train = dummy_train[:,col].astype('bool').T.toarray()[0]
         print 'Training subset {} of {}...'.format(col,np.shape(dummy_train)[1])
-        sub_train = normalize(trainFeatures.tocsr()[idx_train,:])
+        sub_train = normalize(trainFeatures.tocsr()[idx_train,:], norm='l2', axis=0)
         clf.fit(sub_train,trainTargets[idx_train])
        # Use probabilities instead of binary class prediction in order to generate a ranking    
         idx_test = dummy_test[:,col].astype('bool').T.toarray()[0]
-        sub_test = normalize(testFeatures.tocsr()[idx_test,:])
+        sub_test = normalize(testFeatures.tocsr()[idx_test,:], norm='l2', axis=0)
         predicted_scores += clf.predict_proba(sub_test).T[1].tolist()
         predicted_ids += testItemIds[idx_test].tolist()
     

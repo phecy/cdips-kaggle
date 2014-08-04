@@ -44,8 +44,8 @@ def classify(dummy_train,dummy_test,feature_pkl,output_file):
        # Use probabilities instead of binary class prediction in order to generate a ranking    
         idx_test = dummy_test[:,col].astype('bool').T.toarray()[0]
         sub_test = normalize(testFeatures.tocsr()[idx_test,:])
-        predicted_scores += list(clf.predict_proba(sub_test).T[1])
-        predicted_ids += testItemIds[idx_test]
+        predicted_scores += clf.predict_proba(sub_test).T[1].tolist()
+        predicted_ids += testItemIds[idx_test].tolist()
     
     with open(os.path.splitext(feature_pkl)[0]+'_'+output_file,'w') as out_fid:
         out_fid.write("id\n")

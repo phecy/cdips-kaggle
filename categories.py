@@ -9,6 +9,7 @@ import pandas as pd
 from scipy import sparse
 from sklearn.externals import joblib
 from sklearn.linear_model import SGDClassifier
+from sklearn.preprocessing import normalize
 import sys
 
 def indicator(df,label,noncollinear=False):
@@ -19,25 +20,31 @@ def indicator(df,label,noncollinear=False):
         dummy = dummy.drop(dummy.columns[-1])
     return sparse.csr_matrix(dummy)
 
-def classify(dummy_train,dummy_test,data_folder,output_file):
+def classify(dummy_train,dummy_test,feature_pkl,output_file):
     # Train classifier, iterating over subsets
     # Load Features
     print 'Loading features...'
-    trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(os.path.join(data_folder,"train_data.pkl"))
+    trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
     trainTargets = np.array(trainTargets)
     testItemIds = np.array(testItemIds)
     predicted_ids = []
     predicted_scores = []
     # SGD Logistic Regression per sample 
-    clf = SGDClassifier(loss="log",penalty="l2",alpha=1e-4,class_weight="auto")
+    clf = SGDClassifier(alpha=3.16227766017e-08, class_weight='auto', epsilon=0.1,
+          eta0=0.0, fit_intercept=True, l1_ratio=0.15,
+          learning_rate='optimal', loss='log', n_iter=5, n_jobs=1,
+          penalty='elasticnet', power_t=0.5, random_state=None, shuffle=False,
+          verbose=0, warm_start=False)
     for col in range(np.shape(dummy_train)[1]):
         # Get nonzero dummy indices as array
         idx_train = dummy_train[:,col].astype('bool').T.toarray()[0]
         print 'Training subset {} of {}...'.format(col,np.shape(dummy_train)[1])
-        clf.fit(trainFeatures[idx_train,:],trainTargets[idx_train])
+        sub_train = normalize(trainFeatures.tocsr()[idx_train,:])
+        clf.fit(sub_train,trainTargets[idx_train])
        # Use probabilities instead of binary class prediction in order to generate a ranking    
         idx_test = dummy_test[:,col].astype('bool').T.toarray()[0]
-        predicted_scores += clf.predict_proba(testFeatures[idx_test,:]).T[1].tolist()
+        sub_test = normalize(testFeatures.tocsr()[idx_test,:])
+        predicted_scores += clf.predict_proba(trainTargets[idx_test]).tolist()
         predicted_ids += testItemIds[idx_test].tolist()
     
     with open(os.path.join(data_folder,output_file),'w') as out_fid:
@@ -46,16 +53,16 @@ def classify(dummy_train,dummy_test,data_folder,output_file):
            # only writes item_id per output spec, but may want to look at predicted_scores
             out_fid.write("%d\n" % (item_id))
 
-def main(train_file='avito_train.tsv',test_file='avito_test.tsv',data_folder='new-feat-full/'):
+def main(train_file='avito_train.tsv',test_file='avito_test.tsv',feature_pkl='test'):
    print 'Loading categories data frames...'
    df_train = pd.read_csv(train_file, sep='\t', usecols=np.array([1,2]))
    df_test = pd.read_csv(test_file, sep='\t', usecols=np.array([1,2]))
    # category
    print '_SPLIT CATEGORY_'
-   classify(indicator(df_train,'category'),indicator(df_test,'category'),data_folder,'category_split.csv')
+   # classify(indicator(df_train,'category'),indicator(df_test,'category'),feature_pkl,'category_split.csv')
    # subcategory
    print '_SPLIT SUBCATEGORY_'
-   classify(indicator(df_train,'subcategory'),indicator(df_test,'subcategory'),data_folder,'subcategory_split.csv')
+   classify(indicator(df_train,'subcategory'),indicator(df_test,'subcategory'),feature_pkl,'subcategory_split.csv')
    # One classifier, but with subcategory as feature
    # print '_SUBCATEGORY AS FEATURE_'
    # indicator(df_train,'subcategory')

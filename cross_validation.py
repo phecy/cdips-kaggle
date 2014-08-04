@@ -112,8 +112,6 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     ax.set_yticklabels([''] + labels)
     plt.xlabel('Predicted')
     plt.ylabel('True')
-    for ext in ['.png','.pdf','.jpg']:
-        plt.savefig('confusion'+ext)
     
     #Add confusion matrix values to the graph
     width = len(norm_conf)
@@ -124,9 +122,11 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
                     horizontalalignment='center',
                     verticalalignment='center')
     print "Confusion Matrix \n" + str(total_conf)
+    for ext in ['.png','.pdf','.jpg']:
+        fig.savefig('confusion'+ext)
     
     #Plot the ROC
-    plt.figure(figsize=(10,8))
+    fig = plt.figure(figsize=(10,8))
     plt.plot(mean_fpr,mean_tpr)
     plt.xlim([-0.05, 1.05])
     plt.ylim([-0.05, 1.05])
@@ -134,7 +134,7 @@ def main(feature_pkl='C:\\Users\Cory\\Documents\\DataScienceWorkshop\\avito_kagg
     plt.ylabel('True Positive Rate')
     plt.title('Receiver operating characteristic')
     for ext in ['.png','.pdf','.jpg']:
-        plt.savefig('roc'+ext)
+        fig.savefig('roc'+ext)
     
     auc_score = metrics.auc(mean_fpr,mean_tpr)
     print "AUC score\n" + str(auc_score)

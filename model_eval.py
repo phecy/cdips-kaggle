@@ -26,11 +26,6 @@ def main(feature_pkl):
     testFeatures = sklearn.preprocessing.normalize(testFeatures.tocsc(), norm='l2', axis=0)
     #trainSplit, testSplit = splitTuple
     # Best estimator from grid search:
-    clf = SGDClassifier(alpha=1.87381742286e-07,
-           class_weight='auto',
-           loss='hinge',
-           n_iter=10,
-           penalty='l2')
     clf = SGDClassifier(alpha=3.16227766017e-08, class_weight='auto', epsilon=0.1,
        eta0=0.0, fit_intercept=True, l1_ratio=0.15,
        learning_rate='optimal', loss='log', n_iter=5, n_jobs=1,

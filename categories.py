@@ -47,7 +47,7 @@ def classify(dummy_train,dummy_test,feature_pkl,output_file):
         predicted_scores += clf.predict_proba(trainTargets[idx_test]).tolist()
         predicted_ids += testItemIds[idx_test].tolist()
     
-    with open(os.path.join(data_folder,output_file),'w') as out_fid:
+    with open(os.path.splitext(feature_pkl)[0]+'_'+output_file),'w') as out_fid:
         out_fid.write("id\n")
         for pred_score, item_id in sorted(zip(predicted_scores, predicted_ids), reverse = True):
            # only writes item_id per output spec, but may want to look at predicted_scores

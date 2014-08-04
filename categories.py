@@ -24,7 +24,7 @@ def classify(dummy_train,dummy_test,feature_pkl,output_file):
     # Train classifier, iterating over subsets
     # Load Features
     print 'Loading features...'
-    trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
+    featureIndex, trainFeatures, trainTargets, trainItemIds, testFeatures, testItemIds = joblib.load(feature_pkl)
     trainTargets = np.array(trainTargets)
     testItemIds = np.array(testItemIds)
     predicted_ids = []
